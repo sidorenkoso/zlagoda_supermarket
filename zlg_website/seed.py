@@ -6,6 +6,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from sqlalchemy import text
+import transliterate
 
 fake = Faker('uk_UA')
 
@@ -16,8 +17,9 @@ generate_unique_password: Функція створює пароль, який �
 Наприклад, якщо працівник має ім’я "Олександр", прізвище "Іванов", а рік народження 1990, то його пароль буде: олеіван1990. 
 """
 def generate_unique_password(employee: Employee) -> str:
-    # Використовуємо ім'я, прізвище та рік народження для створення унікального пароля
-    return f"{employee.first_name[:3].lower()}{employee.last_name[:3].lower()}{employee.birth_date.year}"
+    first = transliterate.translit(employee.first_name[:3], reversed=True).lower()
+    last = transliterate.translit(employee.last_name[:3], reversed=True).lower()
+    return f"{first}{last}{employee.birth_date.year}"
 
 
 def generate_ua_phone():
