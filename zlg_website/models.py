@@ -1,6 +1,7 @@
 from . import db
 from sqlalchemy.sql import func
 from flask_login import UserMixin
+from datetime import datetime, timedelta
 
 # Працівник
 class Employee(db.Model, UserMixin):
@@ -38,13 +39,37 @@ class Product(db.Model):
 
 # Товар у магазині
 class StoreProduct(db.Model):
-    __tablename__ = 'store_product'
+    tablename = 'store_product'
+
     upc = db.Column(db.String(12), primary_key=True)
     price = db.Column(db.Float)
     quantity = db.Column(db.Integer)
-    is_promotional = db.Column(db.Boolean)
+    expiration_date = db.Column(db.Date)  # НОВЕ: дата придатності
+    is_promotional = db.Column(db.Boolean, default=False)  # Додано поле для акційного статусу
+    promo_price = db.Column(db.Float)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     product = db.relationship('Product', backref='store_items')
+
+    @property
+    def calculate_promotional(self):
+        """Визначає, чи є товар акційним: якщо термін збігає і кількість велика."""
+        soon_expiring = self.expiration_date and self.expiration_date <= datetime.now().date() + timedelta(days=7)
+        high_quantity = self.quantity > 30
+        return soon_expiring and high_quantity
+
+    @property
+    def calculate_promo_price(self):
+        """Ціна акційного товару зі знижкою 20%"""
+        return round(self.price * 0.8, 2) if self.is_promotional else self.price
+
+    @calculate_promotional.setter
+    def calculate_promotional(self, value):
+        self.calculate_promotional = value
+
+    @calculate_promo_price.setter
+    def calculate_promo_price(self, value):
+        self.calculate_promo_price = value
+
 
 # Карта клієнта
 class CustomerCard(db.Model):
@@ -69,6 +94,14 @@ class Receipt(db.Model):
     customer_card = db.relationship('CustomerCard', backref='receipts')
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'))
     employee = db.relationship('Employee', backref='receipts')
+
+    @property
+    def total_sum(self):
+        return round(sum(item.quantity * item.store_product.price for item in self.items), 2)
+
+    @property
+    def vat(self):
+        return round(self.total_sum * 0.2, 2)
 
 # Зв'язок товарів і чеків (позиції в чеку)
 class ReceiptItem(db.Model):
