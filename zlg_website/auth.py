@@ -6,17 +6,15 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 auth = Blueprint('auth', __name__)
 
-
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = request.form.get('email').strip()
         password = request.form.get('password').strip()
-
         user = Employee.query.filter_by(email=email).first()
 
         if user:
-            if user.password== password:  # Перевіряємо хешований пароль
+            if check_password_hash(user.password, password):  # Перевіряємо хешований пароль
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))  # Перенаправляємо на головну сторінку

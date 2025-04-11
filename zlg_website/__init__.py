@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 import os
 from flask_login import LoginManager, login_manager
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+
 
 def create_app():
     app = Flask(__name__)
@@ -35,11 +37,11 @@ def create_app():
     return app
 
 
-
 def create_database(app):
     if not path.exists('zlg_website/' + DB_NAME):
         with app.app_context():
             db.create_all()
+        hashed = generate_password_hash("password")
         print('Database created')
     else:
         print('Database already exists')

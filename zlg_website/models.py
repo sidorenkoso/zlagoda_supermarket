@@ -17,7 +17,7 @@ class Employee(db.Model, UserMixin):
     city = db.Column(db.String(100))
     street = db.Column(db.String(100))
     postal_code = db.Column(db.String(10))
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(10000))
     email = db.Column(db.String(100), unique=True)
 
 # Категорія
