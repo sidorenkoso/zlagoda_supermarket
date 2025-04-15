@@ -34,16 +34,18 @@
         </div>
 
         <div class="flex space-x-4">
-            <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                          clip-rule="evenodd"/>
-                </svg>
-                Додати
-            </button>
+            <a href="{{ url_for('views.add_employee_form') }}">
+        <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clip-rule="evenodd"/>
+            </svg>
+            Додати
+        </button>
+            </a>
             <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
-                Надрукувати звіт
+        Надрукувати звіт
             </button>
         </div>
     </div>
@@ -85,27 +87,6 @@
             </tr>
             {% endfor %}
             {% else %}
-            <!-- Порожні рядки таблиці для прикладу  ------------------------->
-            {% for i in range(10) %}
-            <tr>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2"></td>
-                <td class="border border-gray-300 px-4 py-2">
-                    {% if i < 2 %}
-                    <div class="flex flex-col space-y-1">
-                        <a href="#" class="text-blue-600 hover:underline">Редагувати</a>
-                        <a href="#" class="text-red-600 hover:underline">Видалити</a>
-                    </div>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %} <!--------------------------->
             {% endif %}
             </tbody>
         </table>
