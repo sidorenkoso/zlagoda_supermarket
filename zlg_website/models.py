@@ -22,6 +22,15 @@ class Employee(db.Model, UserMixin):
     password = db.Column(db.String(10000))
     email = db.Column(db.String(100), unique=True)
 
+    @property
+    def full_name(self):
+        return f"{self.last_name} {self.first_name} {self.middle_name}"
+
+    @property
+    def address(self):
+        return f"{self.city}, {self.street}, {self.postal_code}"
+
+
 # Категорія
 class Category(db.Model):
     __tablename__ = 'category'

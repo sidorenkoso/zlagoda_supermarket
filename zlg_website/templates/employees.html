@@ -8,23 +8,37 @@
         <div class="flex items-center">
 
             <div class="flex space-x-4 items-center">
-                <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200">Менеджери</button>
-                <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200">Касири</button>
-
+                <a href="{{ url_for('views.employees', position='Менеджер') }}">
+                    <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200 {% if current_filter == 'Менеджер' %}bg-blue-200{% endif %}">
+                        Менеджери
+                    </button>
+                </a>
+                <a href="{{ url_for('views.employees', position='Касир') }}">
+                    <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200 {% if current_filter == 'Касир' %}bg-blue-200{% endif %}">
+                        Касири
+                    </button>
+                </a>
+                <a href="{{ url_for('views.employees') }}">
+                    <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200 {% if not current_filter %}bg-blue-200{% endif %}">
+                        Всі
+                    </button>
+                </a>
             </div>
 
             <p class="mr-4 ml-4 text-lg">Знайти контактні дані за прізвищем</p>
-             <input
+            <input
                     type="text"
                     placeholder="Пошук..."
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+            >
         </div>
 
         <div class="flex space-x-4">
             <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                          clip-rule="evenodd"/>
                 </svg>
                 Додати
             </button>
@@ -38,61 +52,61 @@
     <div class="overflow-x-auto">
         <table class="min-w-full border-collapse border border-gray-300">
             <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2 text-left">#</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">ПІБ</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Посада</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">ЗП</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Дата Початку</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Дата народження</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Телефон</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Адреса</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">...</th>
-                </tr>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2 text-left">#</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">ПІБ</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Посада</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">ЗП</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Дата Початку</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Дата народження</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Телефон</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Адреса</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">...</th>
+            </tr>
             </thead>
             <tbody>
-                {% if employees %}
-                    {% for employee in employees %}
-                    <tr>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.full_name }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.position }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.salary }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.start_date }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.birth_date }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.phone }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ employee.address }}</td>
-                        <td class="border border-gray-300 px-4 py-2">
-                            <div class="flex flex-col space-y-1">
-                                <a href="/employees/edit/{{ employee.id }}" class="text-blue-600 hover:underline">Редагувати</a>
-                                <a href="/employees/delete/{{ employee.id }}" class="text-red-600 hover:underline">Видалити</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <!-- Порожні рядки таблиці для прикладу  ------------------------->
-                    {% for i in range(10) %}
-                    <tr>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2"></td>
-                        <td class="border border-gray-300 px-4 py-2">
-                            {% if i < 2 %}
-                            <div class="flex flex-col space-y-1">
-                                <a href="#" class="text-blue-600 hover:underline">Редагувати</a>
-                                <a href="#" class="text-red-600 hover:underline">Видалити</a>
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %} <!--------------------------->
-                {% endif %}
+            {% if employees %}
+            {% for employee in employees %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.full_name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.position }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.salary }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.start_date }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.birth_date }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.phone }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ employee.address }}</td>
+                <td class="border border-gray-300 px-4 py-2">
+                    <div class="flex flex-col space-y-1">
+                        <a href="/employees/edit/{{ employee.id }}" class="text-blue-600 hover:underline">Редагувати</a>
+                        <a href="/employees/delete/{{ employee.id }}" class="text-red-600 hover:underline">Видалити</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <!-- Порожні рядки таблиці для прикладу  ------------------------->
+            {% for i in range(10) %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2"></td>
+                <td class="border border-gray-300 px-4 py-2">
+                    {% if i < 2 %}
+                    <div class="flex flex-col space-y-1">
+                        <a href="#" class="text-blue-600 hover:underline">Редагувати</a>
+                        <a href="#" class="text-red-600 hover:underline">Видалити</a>
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %} <!--------------------------->
+            {% endif %}
             </tbody>
         </table>
     </div>

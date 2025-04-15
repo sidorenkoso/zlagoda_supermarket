@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request, abort
 from flask_login import login_required, current_user
+from zlg_website.models import Employee
 
 views = Blueprint('views', __name__)
 
@@ -21,11 +22,15 @@ def welcome():
 @views.route('/employees')
 @login_required
 def employees():
-    # Тут у реальному додатку ви б отримували дані про працівників з бази даних
-    # Приклад:
-    employees = []  # Замість цього буде щось типу Employee.query.all()
+    if current_user.position != 'Менеджер':
+        abort(403)
+    role_filter = request.args.get('position')  # 'Касир' або 'Менеджер'
+    if role_filter:
+        all_employees = Employee.query.filter_by(position=role_filter).order_by(Employee.id).all()
+    else:
+        all_employees = Employee.query.order_by(Employee.id).all()
 
-    return render_template("employees.html", user=current_user, employees=employees)
+    return render_template("employees.html", user=current_user, employees=all_employees, current_filter=role_filter)
 
 
 # Можна також додати додаткові маршрути для деталей, редагування, видалення і додавання працівників
