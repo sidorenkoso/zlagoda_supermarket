@@ -129,15 +129,15 @@ def seed_database(n_employees=5, n_categories=3, n_products=10, n_customers=5, n
 
         # Категорії товарів із характеристиками
         product_categories = [
-            ('Продукти харчування', ['вага', 'склад', 'термін придатності']),
-            ('Напої', ['об\'єм', 'термін придатності', 'склад']),
-            ('Солодощі', ['вага', 'склад', 'термін придатності']),
-            ('Молочні продукти', ['вага', 'склад', 'термін придатності']),
-            ('М\'ясні продукти', ['вага', 'склад', 'термін придатності']),
-            ('Кондитерські вироби', ['вага', 'склад', 'термін придатності']),
-            ('Заморожені продукти', ['вага', 'термін придатності', 'склад']),
-            ('Зернові та бобові', ['вага', 'термін придатності', 'склад']),
-            ('Овочі та фрукти', ['вага', 'термін придатності']),
+            ('Продукти харчування', ['вага', 'склад']),
+            ('Напої', ['об\'єм', 'склад']),
+            ('Солодощі', ['вага', 'склад']),
+            ('Молочні продукти', ['вага', 'склад']),
+            ('М\'ясні продукти', ['вага', 'склад']),
+            ('Кондитерські вироби', ['вага', 'склад']),
+            ('Заморожені продукти', ['вага', 'склад']),
+            ('Зернові та бобові', ['вага', 'склад']),
+            ('Овочі та фрукти', ['вага']),
             ('Спеції та приправи', ['вага', 'склад'])
         ]
 
@@ -302,12 +302,14 @@ def seed_database(n_employees=5, n_categories=3, n_products=10, n_customers=5, n
             customers.append(card)
 
         # Чеки
+        receipt_item_id = 2001
+        cashiers = [emp for emp in employees if emp.position == 'Касир']
         for _ in range(n_receipts):
             receipt = Receipt(
                 receipt_number=fake.unique.bothify(text='R####'),
                 date=fake.date_time_between(start_date='-3y', end_date='now'),
                 customer_card=choice(customers),
-                employee=choice(employees)
+                employee=choice(cashiers)
             )
             db.session.add(receipt)
 
@@ -315,11 +317,13 @@ def seed_database(n_employees=5, n_categories=3, n_products=10, n_customers=5, n
             items_count = randint(1, 5)
             for _ in range(items_count):
                 item = ReceiptItem(
+                    id = receipt_item_id,
                     receipt=receipt,
                     store_product=choice(store_products),
                     quantity=randint(1, 5)
                 )
                 db.session.add(item)
+                receipt_item_id += 1
 
 
         db.session.commit()

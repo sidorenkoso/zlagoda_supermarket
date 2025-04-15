@@ -2,6 +2,7 @@ from . import db
 from sqlalchemy.sql import func
 from flask_login import UserMixin
 from datetime import datetime, timedelta
+from sqlalchemy.orm import validates
 
 # Працівник
 class Employee(db.Model, UserMixin):
@@ -102,6 +103,12 @@ class Receipt(db.Model):
     @property
     def vat(self):
         return round(self.total_sum * 0.2, 2)
+
+    @validates('employee')
+    def validate_cashier_only(self, key, employee):
+        if employee.position != 'Касир':
+            raise ValueError("Чек може бути створений тільки касиром.")
+        return employee
 
 # Зв'язок товарів і чеків (позиції в чеку)
 class ReceiptItem(db.Model):
