@@ -40,7 +40,15 @@ def employees():
 def add_employee_form():
     if current_user.position != 'Менеджер':
         abort(403)  # Тільки менеджери можуть додавати працівників
-    return render_template("add_employee.html", user=current_user)
+
+    try:
+        last_employee = db.session.query(Employee).order_by(Employee.id.desc()).first()
+        next_id = (last_employee.id + 1) if last_employee else 1
+    except Exception as e:
+        next_id = 1  # якщо база ще пуста або сталася помилка
+
+    return render_template("add_employee.html", user=current_user, next_id=next_id)
+
 
 
 @views.route('/employees/add', methods=['POST'])
@@ -52,7 +60,7 @@ def add_employee():
     if request.method == "POST":
         try:
             # Отримуємо дані з форми
-            id = request.form.get("id")
+            id = int(request.form.get("id"))
             full_name = request.form.get("full_name")
             position = request.form.get("position")
             salary = request.form.get("salary")
@@ -131,7 +139,20 @@ def edit_employee(id):
 
 
 
-@views.route('/employees/delete/<int:id>')
+@views.route('/employees/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_employee(id):
-    return f"Видалення працівника з ID {id}"  # Додайте логіку видалення
+    if current_user.position != 'Менеджер':
+        abort(403)
+
+    employee = Employee.query.get_or_404(id)
+
+    try:
+        db.session.delete(employee)
+        db.session.commit()
+        flash("Працівника успішно видалено!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Помилка при видаленні: {str(e)}", "error")
+
+    return redirect(url_for('views.employees'))

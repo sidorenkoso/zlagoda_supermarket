@@ -24,11 +24,28 @@ class Employee(db.Model, UserMixin):
 
     @property
     def full_name(self):
-        return f"{self.last_name} {self.first_name} {self.middle_name}"
+        parts = [self.last_name, self.first_name, self.middle_name]
+        return " ".join(part for part in parts if part)
+
+    @full_name.setter
+    def full_name(self, value):
+        parts = value.split(maxsplit=2)
+        self.last_name = parts[0]
+        self.first_name = parts[1] if len(parts) > 1 else ""
+        self.middle_name = parts[2] if len(parts) > 1 else ""
 
     @property
     def address(self):
         return f"{self.city}, {self.street}, {self.postal_code}"
+
+    @address.setter
+    def address(self, value):
+        # Очікується формат: "місто, вулиця, поштовий_індекс"
+        parts = [part.strip() for part in value.split(",")]
+        if len(parts) != 3:
+            raise ValueError("Address must be in format: 'City, Street, PostalCode'")
+
+        self.city, self.street, self.postal_code = parts
 
 
 # Категорія
