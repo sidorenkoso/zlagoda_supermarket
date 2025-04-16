@@ -24,7 +24,9 @@ def create_app():
 
     from .models import Employee
 
-    create_database(app)
+    with app.app_context():
+        if database_is_empty():
+            create_database(app)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -45,3 +47,12 @@ def create_database(app):
         print('Database created')
     else:
         print('Database already exists')
+
+
+def database_is_empty():
+    from .models import Employee, Product, Category  # тощо — ключові таблиці
+    return (
+        Employee.query.first() is None and
+        Product.query.first() is None and
+        Category.query.first() is None
+    )

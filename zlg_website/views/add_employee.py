@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, abort,
 from flask_login import login_required, current_user
 from zlg_website.models import Employee, db
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 from . import views
 
 # Оновлені маршрути для додавання працівників
@@ -39,7 +40,7 @@ def add_employee():
             phone = request.form.get("phone")
             address = request.form.get("address")
             email = request.form.get("email")
-            password = request.form.get("password")  # В реальному додатку тут має бути хешування паролю
+            password = generate_password_hash(request.form.get("password"))
 
             # Створюємо нового працівника
             new_employee = Employee(
@@ -52,7 +53,7 @@ def add_employee():
                 phone=phone,
                 address=address,
                 email=email,
-                password=password  # В реальному додатку тут має бути хешований пароль
+                password=password
             )
 
             # Додаємо в базу даних
