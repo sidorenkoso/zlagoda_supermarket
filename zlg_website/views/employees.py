@@ -12,6 +12,8 @@ def employees():
 
     search_query = request.args.get('search', '')
     position_filter = request.args.get('position')
+    sort = request.args.get('sort')
+    order = request.args.get('order', 'asc')
 
     query = Employee.query
 
@@ -21,6 +23,15 @@ def employees():
     if search_query:
         query = query.filter(Employee.last_name.ilike(f"%{search_query}%"))
 
-    all_employees = query.order_by(Employee.id).all()
+    # Сортування
+    if sort == 'last_name':
+        if order == 'desc':
+            query = query.order_by(Employee.last_name.desc())
+        else:
+            query = query.order_by(Employee.last_name.asc())
+    else:
+        query = query.order_by(Employee.id.asc())  # за замовчуванням
 
-    return render_template("employees.html", user=current_user, employees=all_employees, current_filter=position_filter)
+    employees = query.all()
+
+    return render_template("employees.html", user=current_user, employees=employees, current_filter=position_filter)
