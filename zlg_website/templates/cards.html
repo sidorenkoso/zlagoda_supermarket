@@ -46,28 +46,17 @@
             </tr>
             </thead>
             <tbody>
-            {% if employees %}
-            {% for employee in employees %}
+            {% if clients %}
+            {% for client in clients %}
             <tr>
-                 <!---
-                <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.full_name }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.position }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.salary }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.start_date }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.birth_date }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.phone }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ employee.address }}</td>
-                <td class="border border-gray-300 px-4 py-2">
-                    <div class="flex flex-col space-y-1">
-                        <a href="/employees/edit/{{ employee.id }}" class="text-blue-600 hover:underline">Редагувати</a>
-                        <form method="POST" action="{{ url_for('views.delete_employee', id=employee.id) }}" onsubmit="return confirmDelete()" class="inline">
-                            <button type="submit" class="text-red-600 hover:underline">Видалити</button>
-                        </form>
+                 <td class="border border-gray-300 px-4 py-2">{{ client.card_number }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ client.last_name }} {{ client.first_name }} {{ client.middle_name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ client.phone }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ client.city }}, {{ client.street }}, {{ client.postal_code }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ client.discount_percent }}</td>
 
-                    </div>
                 </td>
-                -->
+
             </tr>
             {% endfor %}
             {% else %}
