@@ -26,11 +26,17 @@
             </div>
 
             <p class="mr-4 ml-4 text-lg">Знайти контактні дані за прізвищем</p>
-            <input
-                    type="text"
-                    placeholder="Пошук..."
-                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
+            <form method="GET" action="{{ url_for('views.employees') }}" class="flex items-center" id="search-form">
+    <input
+        type="text"
+        name="search"
+        placeholder="Пошук..."
+        value="{{ request.args.get('search', '') }}"
+        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук</button>
+</form>
+
         </div>
 
         <div class="flex space-x-4">
