@@ -20,7 +20,6 @@ def clients():
     if search_query:
         query = query.filter(
             CustomerCard.last_name.ilike(f"%{search_query}%")
-            | CustomerCard.first_name.ilike(f"%{search_query}%")
         )
 
     # Сортування
