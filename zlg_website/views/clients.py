@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, abort,
 from flask_login import login_required, current_user
 from zlg_website.models import CustomerCard, db
 from datetime import datetime
+from sqlalchemy import func
 from . import views
 
 @views.route('/clients')
@@ -17,10 +18,6 @@ def clients():
     if city_filter:
         query = query.filter(CustomerCard.city.ilike(f"%{city_filter}%"))
 
-    if search_query:
-        query = query.filter(
-            CustomerCard.last_name.ilike(f"%{search_query}%")
-        )
 
     # Сортування
     if sort == 'last_name':
@@ -31,6 +28,10 @@ def clients():
         query = query.order_by(CustomerCard.card_number.asc())
 
     clients = query.all()
+
+    if search_query:
+        search_lower = search_query.lower()
+        clients = [c for c in clients if search_lower in c.last_name.lower()]
 
     return render_template("cards.html", user=current_user, clients=clients,
                            current_city=city_filter, search_query=search_query)

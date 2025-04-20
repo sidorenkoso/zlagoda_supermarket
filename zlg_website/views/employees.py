@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from zlg_website.models import Employee, db
 from datetime import datetime
 from . import views
+from sqlalchemy import func
 
 @views.route('/employees')
 @login_required
@@ -20,8 +21,7 @@ def employees():
     if position_filter:
         query = query.filter(Employee.position == position_filter)
 
-    if search_query:
-        query = query.filter(Employee.last_name.ilike(f"%{search_query}%"))
+
 
     # Сортування
     if sort == 'last_name':
@@ -33,5 +33,12 @@ def employees():
         query = query.order_by(Employee.id.asc())  # за замовчуванням
 
     employees = query.all()
+
+    if search_query:
+        search_lower = search_query.lower()
+        employees = [
+            emp for emp in employees
+            if search_lower in emp.last_name.lower()
+        ]
 
     return render_template("employees.html", user=current_user, employees=employees, current_filter=position_filter)

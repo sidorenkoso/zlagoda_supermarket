@@ -17,7 +17,7 @@
             {% endif %}
         {% endwith %}
 
-        <form action="{{ url_for('views.update_client', client_id=client.id) }}" method="POST" class="space-y-6">
+        <form action="{{ url_for('views.edit_client', client_id=client.id) }}" method="POST" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
                     <label for="card_number" class="block mb-2 text-lg">Номер картки</label>
