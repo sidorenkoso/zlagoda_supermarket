@@ -30,4 +30,4 @@ def add_category():
     last_category = Category.query.order_by(Category.category_number.desc()).first()
     next_id = (last_category.category_number + 1) if last_category else 1
 
-    return render_template("add_category.html", user=current_user, next_id=next_id)
+    return render_template("form_category.html", user=current_user, next_id=next_id)

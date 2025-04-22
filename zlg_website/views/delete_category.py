@@ -6,9 +6,12 @@ from . import views
 @views.route('/categories/<int:category_id>/delete')
 @login_required
 def delete_category(category_id):
-    #прописати вихід, якщо в категорії є товари
-
     category = Category.query.get_or_404(category_id)
+
+    if category.products:
+        flash("Неможливо видалити категорію, оскільки в ній є товари.", 'error')
+        return redirect(url_for('views.categories'))
+
     db.session.delete(category)
     db.session.commit()
     flash("Категорію видалено", 'success')

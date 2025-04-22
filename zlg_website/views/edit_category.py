@@ -16,4 +16,4 @@ def edit_category(category_id):
             db.session.commit()
             flash("Категорію оновлено", 'success')
             return redirect(url_for('views.categories'))
-    return render_template('edit_category.html', category=category, user=current_user)
+    return render_template('form_category.html', category=category, user=current_user)

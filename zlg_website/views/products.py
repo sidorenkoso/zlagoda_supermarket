@@ -17,9 +17,9 @@ def products():
         query = query.order_by(
             Product.name.desc() if order == 'desc' else Product.name.asc()
         )
-    elif sort == 'manufacturer':
+    elif sort == 'id':
         query = query.order_by(
-            Product.manufacturer.desc() if order == 'desc' else Product.manufacturer.asc()
+            Product.id.asc()
         )
     else:
         query = query.order_by(Product.id.asc())  # За замовчуванням — за id

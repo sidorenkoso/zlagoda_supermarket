@@ -41,7 +41,9 @@
         <table class="min-w-full border-collapse border border-gray-300">
             <thead>
             <tr class="bg-gray-100">
-                <th class="border border-gray-300 px-4 py-2 text-left">#</th>
+                <th class="border border-gray-300 px-4 py-2 text-left"><a href="{{ url_for('views.products', sort='id') }}" class="hover:underline">
+                                #
+                            </a></th>
                 <th class="border border-gray-300 px-4 py-2 text-left">
                     <a href="{{ url_for('views.products', search=request.args.get('search'), sort='name', order='asc' if request.args.get('order') == 'desc' else 'desc') }}" class="hover:underline">
                         Назва
@@ -51,14 +53,10 @@
                     </a>
                 </th>
                 <th class="border border-gray-300 px-4 py-2 text-left">
-                    <a href="{{ url_for('views.products', search=request.args.get('search'), sort='manufacturer', order='asc' if request.args.get('order') == 'desc' else 'desc') }}" class="hover:underline">
                         Виробник
-                        {% if request.args.get('sort') == 'manufacturer' %}
-                            {% if request.args.get('order') == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                    </a>
                 </th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Характеристика</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Категорія</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">...</th>
             </tr>
             </thead>
@@ -69,10 +67,12 @@
                     <td class="border border-gray-300 px-4 py-2">{{ product.id }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ product.name }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ product.manufacturer }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ product.description }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ product.specifications }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ product.category_number }}</td>
                     <td class="border border-gray-300 px-4 py-2">
                         <div class="flex flex-col space-y-1">
                             <a href="{{ url_for('views.edit_product', product_id=product.id) }}" class="text-blue-600 hover:underline">Редагувати</a>
+
                             <form method="POST" action="{{ url_for('views.delete_product', product_id=product.id) }}" onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?')" class="inline">
                                 <button type="submit" class="text-red-600 hover:underline">Видалити</button>
                             </form>

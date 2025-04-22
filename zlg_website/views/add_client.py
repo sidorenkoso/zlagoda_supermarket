@@ -27,9 +27,9 @@ def add_client():
             first_name = request.form.get("first_name")
             middle_name = request.form.get("middle_name")
             phone = request.form.get("phone")
-            city = request.form.get("city")
-            street = request.form.get("street")
-            postal_code = request.form.get("postal_code")
+            city = request.form.get("city") or None
+            street = request.form.get("street") or None
+            postal_code = request.form.get("postal_code") or None
             discount_percent = float(request.form.get("discount_percent"))
 
             new_client = CustomerCard(
