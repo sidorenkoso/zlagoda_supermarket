@@ -37,18 +37,6 @@ def categories():
     return render_template("category.html", user=current_user, categories=categories,
                            search_query=search_query, sort=sort, order=order)
 
-@views.route('/categories/<int:category_id>')
-@login_required
-def view_category(category_id):
-    category = Category.query.get_or_404(category_id)
-    return render_template('goods.html', category=category, user=current_user)
-    # Пошук (за частковим збігом назви)
-    if search_query:
-        search_lower = search_query.lower()
-        categories = [c for c in categories if search_lower in c.name.lower()]
-
-    return render_template("category.html", user=current_user, categories=categories,
-                           search_query=search_query, sort=sort, order=order)
 
 @views.route('/categories/<int:category_id>')
 @login_required
