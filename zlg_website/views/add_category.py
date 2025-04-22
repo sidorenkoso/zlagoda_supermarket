@@ -26,4 +26,8 @@ def add_category():
                 flash(f"Помилка при додаванні категорії: {str(e)}", "error")
                 return redirect(url_for("views.add_category"))
 
-    return render_template("add_category.html", user=current_user)
+    # Обчислюємо next_id тільки якщо GET-запит
+    last_category = Category.query.order_by(Category.category_number.desc()).first()
+    next_id = (last_category.category_number + 1) if last_category else 1
+
+    return render_template("add_category.html", user=current_user, next_id=next_id)

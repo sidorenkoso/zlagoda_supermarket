@@ -43,7 +43,7 @@ class Employee(db.Model, UserMixin):
         # Очікується формат: "місто, вулиця, поштовий_індекс"
         parts = [part.strip() for part in value.split(",")]
         if len(parts) != 3:
-            raise ValueError("Address must be in format: 'City, Street, PostalCode'")
+            raise ValueError("Адреса має бути в форматі: 'Місто, вулиця, поштовий індекс'")
 
         self.city, self.street, self.postal_code = parts
 

@@ -33,5 +33,5 @@ def clients():
         search_lower = search_query.lower()
         clients = [c for c in clients if search_lower in c.last_name.lower()]
 
-    return render_template("cards.html", user=current_user, clients=clients,
+    return render_template("clients.html", user=current_user, clients=clients,
                            current_city=city_filter, search_query=search_query)
