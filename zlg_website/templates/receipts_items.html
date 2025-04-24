@@ -8,9 +8,9 @@
         <div class="flex justify-between items-center mb-4">
             <div>
                 <p class="text-lg"><strong>Дата:</strong> {{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</p>
-                <p class="text-lg"><strong>Касир:</strong> {{ receipt.employee.surname }} {{ receipt.employee.name }}</p>
+                <p class="text-lg"><strong>Касир:</strong> {{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</p>
                 {% if receipt.customer_card %}
-                <p class="text-lg"><strong>Клієнт:</strong> {{ receipt.customer_card.customer_name }}</p>
+                <p class="text-lg"><strong>Клієнт:</strong> {{ receipt.customer_card.last_name }} {{ receipt.customer_card.first_name }}</p>
                 <p class="text-lg"><strong>Картка клієнта:</strong> {{ receipt.customer_card_number }}</p>
                 {% endif %}
             </div>

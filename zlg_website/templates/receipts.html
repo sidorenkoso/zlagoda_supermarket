@@ -90,7 +90,7 @@
                     <td class="border border-gray-300 px-4 py-2">{{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
                     <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.surname }} {{ receipt.employee.name }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</td>
                     <td class="border border-gray-300 px-4 py-2">
                         <div class="flex flex-col space-y-1">
                             <a href="{{ url_for('views.view_receipt', receipt_number=receipt.receipt_number) }}" class="text-blue-600 hover:underline">Переглянути</a>

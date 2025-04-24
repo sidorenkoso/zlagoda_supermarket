@@ -67,7 +67,8 @@ def receipts():
 def view_receipt(receipt_number):
     # Отримуємо чек за його номером
     receipt = Receipt.query.get_or_404(receipt_number)
-    return render_template('receipts_items.html', receipt=receipt)
+    return render_template('receipts_items.html', receipt=receipt,
+        user=current_user)
 
 
 @views.route('/delete_receipt/<receipt_number>', methods=['POST'])
@@ -84,4 +85,5 @@ def delete_receipt(receipt_number):
     db.session.commit()
 
     flash('Чек успішно видалено', 'success')
-    return redirect(url_for('views.receipts'))
+    return redirect(url_for('views.receipts'),
+        user=current_user)
