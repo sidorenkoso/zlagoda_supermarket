@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Чеки{% endblock %}
+{% block content %}
+<div class="py-4">
+    <h1 class="text-4xl font-bold mb-6 text-center">Чеки</h1>
+
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center">
+            <div class="mr-4">
+                <p class="mb-1">Касир</p>
+                <select name="employee_id" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                    <option value="">Всі касири</option>
+                    {% for employee in employees %}
+                        {% if employee.position == 'Касир' %}
+                            <option value="{{ employee.id }}" {% if request.args.get('employee_id')|int == employee.id %}selected{% endif %}>
+                                {{ employee.surname }} {{ employee.name }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mr-4">
+                <p class="mb-1">Період</p>
+                <input 
+                    type="date" 
+                    name="date_from" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value="{{ request.args.get('date_from', '') }}"
+                />
+                <span class="mx-2">-</span>
+                <input 
+                    type="date" 
+                    name="date_to" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value="{{ request.args.get('date_to', '') }}"
+                />
+            </div>
+
+            <div>
+                <button type="submit" class="mt-5 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    Знайти
+                </button>
+            </div>
+        </div>
+        
+        <div>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                Надрукувати звіт
+            </button>
+        </div>
+    </div>
+
+    <!-- Таблиця чеків -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.receipts', sort='receipt_number') }}" class="hover:underline">
+                            #
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.receipts', sort='date') }}" class="hover:underline">
+                            Дата
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.receipts', sort='total_sum') }}" class="hover:underline">
+                            Загальна сума
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        ПДВ
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        Касир
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <!-- Actions column -->
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if receipts %}
+                {% for receipt in receipts %}
+                <tr>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.receipt_number }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.surname }} {{ receipt.employee.name }}</td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <div class="flex flex-col space-y-1">
+                            <a href="{{ url_for('views.view_receipt', receipt_number=receipt.receipt_number) }}" class="text-blue-600 hover:underline">Переглянути</a>
+                            <form method="POST" action="{{ url_for('views.delete_receipt', receipt_number=receipt.receipt_number) }}" onsubmit="return confirm('Ви впевнені, що хочете видалити цей чек?')" class="inline">
+                                <button type="submit" class="text-red-600 hover:underline">Видалити</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="border border-gray-300 px-4 py-2 text-center">Немає результатів</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 text-right">
+        <div class="font-bold text-lg">
+            Загальна сума чеків: {% if receipts %}{{ total_sum }} грн{% else %}0 грн{% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const cashierSelect = document.querySelector('select[name="employee_id"]');
+    const dateFrom = document.querySelector('input[name="date_from"]');
+    const dateTo = document.querySelector('input[name="date_to"]');
+    const findButton = document.querySelector('button[type="submit"]');
+    
+    // Add event listener to the find button
+    findButton.addEventListener('click', function() {
+        // Build the query string
+        let queryParams = new URLSearchParams();
+        
+        if (cashierSelect.value) {
+            queryParams.append('employee_id', cashierSelect.value);
+        }
+        
+        if (dateFrom.value) {
+            queryParams.append('date_from', dateFrom.value);
+        }
+        
+        if (dateTo.value) {
+            queryParams.append('date_to', dateTo.value);
+        }
+        
+        // Redirect to the receipts page with the filters
+        window.location.href = "{{ url_for('views.receipts') }}" + (queryParams.toString() ? '?' + queryParams.toString() : '');
+    });
+});
+</script>
+{% endblock %}
