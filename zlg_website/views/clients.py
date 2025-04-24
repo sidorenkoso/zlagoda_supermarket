@@ -30,8 +30,11 @@ def clients():
     clients = query.all()
 
     if search_query:
-        search_lower = search_query.lower()
-        clients = [c for c in clients if search_lower in c.last_name.lower()]
+        try:
+            discount_value = int(float(search_query))
+            clients = [c for c in clients if discount_value <= c.discount_percent < discount_value + 1]
+        except ValueError:
+            clients = []
 
     return render_template("clients.html", user=current_user, clients=clients,
                            current_city=city_filter, search_query=search_query)

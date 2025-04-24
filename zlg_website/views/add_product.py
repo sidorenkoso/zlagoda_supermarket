@@ -35,4 +35,5 @@ def add_product():
                 return redirect(url_for("views.add_product"))
 
     categories = Category.query.all()
-    return render_template("form_products.html", user=current_user, categories=categories)
+    next_id = (db.session.query(db.func.max(Product.id)).scalar() or 0) + 1
+    return render_template("form_products.html", user=current_user, categories=categories, next_id=next_id)

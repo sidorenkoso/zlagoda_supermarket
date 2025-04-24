@@ -6,7 +6,7 @@
 
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
-             <div class="flex space-x-4 items-center">
+            <div class="flex space-x-4 items-center">
                 <a href="{{ url_for('views.employees', position='Менеджер') }}">
                     <button class="px-4 py-2 border rounded-lg bg-gray-100 hover:bg-gray-200 {% if current_filter == 'Менеджер' %}bg-blue-200{% endif %}">
                         Акційні
@@ -23,23 +23,25 @@
                     </button>
                 </a>
             </div>
-            <p class="mr-4 ml-4 text-lg">Знайти </p>
+            <p class="mr-4 ml-4 text-lg">Знайти за UPC</p>
             <form method="GET" action="{{ url_for('views.clients') }}" class="flex items-center" id="search-form">
                 <input
-                    type="text"
-                    name="search"
-                    placeholder="Пошук..."
-                    value="{{ request.args.get('search', '') }}"
-                    class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="text"
+                        name="search"
+                        placeholder="Пошук..."
+                        value="{{ request.args.get('search', '') }}"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук</button>
+                <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук
+                </button>
             </form>
         </div>
 
         <div class="flex space-x-4">
-            <a href="{{ url_for('views.add_client') }}">
+            <a href="{{ url_for('views.add_storeproduct') }}">
                 <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                         fill="currentColor">
                         <path fill-rule="evenodd"
                               d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                               clip-rule="evenodd"/>
@@ -58,7 +60,7 @@
         <table class="min-w-full border-collapse border border-gray-300">
             <thead>
             <tr class="bg-gray-100">
-                <th class="border border-gray-300 px-4 py-2 text-left">#UPC </th>
+                <th class="border border-gray-300 px-4 py-2 text-left">#UPC</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Назва</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Ціна продажу</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Кількість</th>
@@ -67,26 +69,35 @@
             </tr>
             </thead>
             <tbody>
-            {% if clients %}
-                {% for client in clients %}
-                <tr>
-                    <td class="border border-gray-300 px-4 py-2">{{ client.card_number }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ client.last_name }} {{ client.first_name }} {{ client.middle_name }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ client.phone }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ client.city }}, {{ client.street }}, {{ client.postal_code }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ client.discount_percent }}</td>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <div class="flex flex-col space-y-1">
-                            <a href="/clients/edit/{{ client.card_number }}" class="text-blue-600 hover:underline">Редагувати</a>
-                            <form method="POST" action="{{ url_for('views.delete_client', card_number=client.card_number) }}" onsubmit="return confirmDeleteClient()" class="inline">
-                                <button type="submit" class="text-red-600 hover:underline">Списати</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
+            {% if products %}
+            {% for product in products %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2">{{ product.upc }}</td>  <!-- UPC товару -->
+                <td class="border border-gray-300 px-4 py-2">{{ product.product.name }}</td>  <!-- Назва товару -->
+                <td class="border border-gray-300 px-4 py-2">{{ product.price }}</td>  <!-- Ціна товару -->
+                <td class="border border-gray-300 px-4 py-2">{{ product.quantity }}</td>  <!-- Кількість товару -->
+                <td class="border border-gray-300 px-4 py-2">{{ 'Так' if product.is_promotional else 'Ні' }}</td>
+                <!-- Акційний товар -->
+                <td class="border border-gray-300 px-4 py-2">
+                    <div class="flex flex-col space-y-1">
+                        <a href="/storeproducts/edit/{{ product.upc }}"
+                           class="text-blue-600 hover:underline">Редагувати</a>
+                        <form method="POST" action="{{ url_for('views.delete_storeproduct', upc=product.upc) }}"
+                              onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?')" class="inline">
+                            <button type="submit" class="text-red-600 hover:underline">Видалити</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-4">Немає товарів для відображення</td>
+            </tr>
             {% endif %}
             </tbody>
+
+
         </table>
     </div>
 </div>

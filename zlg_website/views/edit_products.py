@@ -14,13 +14,15 @@ def edit_product(product_id):
         specifications = request.form.get('specifications')
         category_number = request.form.get('category_number')
 
-        if not name or not manufacturer or not category_number:
+
+
+        if not name or not manufacturer or  not category_number:
             flash("Усі обов'язкові поля мають бути заповнені.", 'error')
         else:
             product.name = name
             product.manufacturer = manufacturer
             product.specifications = specifications
-            product.category_number = category_number
+            product.category_number = int(category_number)
             db.session.commit()
             flash("Товар оновлено", 'success')
             return redirect(url_for('views.products'))

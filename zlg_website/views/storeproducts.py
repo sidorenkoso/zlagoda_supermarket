@@ -1,16 +1,16 @@
 from flask import Blueprint, render_template, request, abort
 from flask_login import login_required, current_user
-from zlg_website.models import Product, Category  # імпорт моделі Category
+from zlg_website.models import StoreProduct, Product, Category  # імпорт моделі Category
 from . import views
 
-@views.route('/products')
+@views.route('/stock')
 @login_required
-def products():
+def storeproducts():
     category_number = request.args.get('category')
     sort = request.args.get('sort')
     order = request.args.get('order', 'asc')
 
-    query = Product.query
+    query = StoreProduct.query.join(Product)
 
     if category_number:
         try:
@@ -34,5 +34,5 @@ def products():
     products = query.all()
     categories = Category.query.all()
 
-    return render_template("products.html", user=current_user, products=products, categories=categories, sort=sort, order=order, category_number=category_number)
+    return render_template("storeproducts.html", user=current_user, products=products, categories=categories, sort=sort, order=order, category_number=category_number)
 
