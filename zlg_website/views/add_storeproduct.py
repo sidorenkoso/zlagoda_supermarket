@@ -43,7 +43,6 @@ def add_storeproduct():
                 flash(f"Помилка при додаванні товару у магазин: {str(e)}", "error")
                 return redirect(url_for("views.add_storeproduct"))
 
-    subquery = db.session.query(StoreProduct.product_id).filter(StoreProduct.product_id != None)
-    products = Product.query.filter(~Product.id.in_(subquery)).all()
+    products = Product.query.all()
 
     return render_template("form_storeproduct.html", user=current_user, products=products)
