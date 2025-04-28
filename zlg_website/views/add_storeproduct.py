@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, request, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from zlg_website.models import StoreProduct, Product, db
@@ -21,6 +23,7 @@ def add_storeproduct():
         if not upc or not product_id or not price or not quantity:
             flash("Обов'язкові поля повинні бути заповнені.", "error")
         else:
+            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date() if expiration_date else None
             new_store_product = StoreProduct(
                 upc=upc,
                 product_id=product_id,
