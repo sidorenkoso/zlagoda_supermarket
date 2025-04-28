@@ -66,7 +66,7 @@ class Product(db.Model):
 
 # Товар у магазині
 class StoreProduct(db.Model):
-    tablename = 'store_product'
+    __tablename__ = 'store_product'
 
     upc = db.Column(db.String(12), primary_key=True)
     price = db.Column(db.Float)

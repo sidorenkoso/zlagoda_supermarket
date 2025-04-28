@@ -43,5 +43,9 @@ def add_storeproduct():
                 flash(f"Помилка при додаванні товару у магазин: {str(e)}", "error")
                 return redirect(url_for("views.add_storeproduct"))
 
-    products = Product.query.all()
+    subquery = db.session.query(StoreProduct.product_id).filter(StoreProduct.product_id != None)
+    print("Subquery result:", [item for item in subquery])  # Виводимо ID товарів, які вже є в StoreProduct
+    products = Product.query.filter(~Product.id.in_(subquery)).all()
+    print("Products:", products)  # Виводимо результати пошуку товарів, яких нема в StoreProduct
+
     return render_template("form_storeproduct.html", user=current_user, products=products)

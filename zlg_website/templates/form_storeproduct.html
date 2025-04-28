@@ -30,17 +30,14 @@
 
         <div>
             <label for="product_id" class="block mb-2 text-lg">Назва товару</label>
-            <select id="product_id" name="product_id" required
-                    class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    {% if storeproduct %}disabled{% endif %}>
-                <option value="" disabled {% if not storeproduct %}selected{% endif %}>Оберіть товар</option>
-                {% for product in products %}
-                    <option value="{{ product.id }}"
-                        {% if storeproduct and product.id == storeproduct.product_id %}selected{% endif %}>
-                        {{ product.name }}
-                    </option>
-                {% endfor %}
-            </select>
+<select id="product_id" name="product_id" required
+        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <option value="" disabled selected>Оберіть товар</option>
+    {% for product in products %}
+        <option value="{{ product.id }}">{{ product.name }}</option>
+    {% endfor %}
+</select>
+
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
