@@ -19,19 +19,19 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
             <div class="mr-4">
                 <p class="mb-1">Період</p>
-                <input 
-                    type="date" 
-                    name="date_from" 
+                <input
+                    type="date"
+                    name="date_from"
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value="{{ request.args.get('date_from', '') }}"
                 />
                 <span class="mx-2">-</span>
-                <input 
-                    type="date" 
-                    name="date_to" 
+                <input
+                    type="date"
+                    name="date_to"
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value="{{ request.args.get('date_to', '') }}"
                 />
@@ -43,7 +43,7 @@
                 </button>
             </div>
         </div>
-        
+
         <div>
             <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
                 Надрукувати звіт
@@ -124,24 +124,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateFrom = document.querySelector('input[name="date_from"]');
     const dateTo = document.querySelector('input[name="date_to"]');
     const findButton = document.querySelector('button[type="submit"]');
-    
+
     // Add event listener to the find button
     findButton.addEventListener('click', function() {
         // Build the query string
         let queryParams = new URLSearchParams();
-        
+
         if (cashierSelect.value) {
             queryParams.append('employee_id', cashierSelect.value);
         }
-        
+
         if (dateFrom.value) {
             queryParams.append('date_from', dateFrom.value);
         }
-        
+
         if (dateTo.value) {
             queryParams.append('date_to', dateTo.value);
         }
-        
+
         // Redirect to the receipts page with the filters
         window.location.href = "{{ url_for('views.receipts') }}" + (queryParams.toString() ? '?' + queryParams.toString() : '');
     });

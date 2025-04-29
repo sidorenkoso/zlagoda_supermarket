@@ -24,7 +24,7 @@
                 </a>
             </div>
 
-            <p class="mr-4 ml-4 text-lg">Знайти за UPC</p>
+            <p class="mr-4 ml-4 text-lg">Пошук за UPC або назвою</p>
             <form method="GET" action="{{ url_for('views.storeproducts') }}" class="flex items-center" id="search-form">
                 <input
                         type="text"
@@ -38,6 +38,7 @@
             </form>
         </div>
 
+        {% if user.position == 'Менеджер' %}
         <div class="flex space-x-4">
             <a href="{{ url_for('views.add_storeproduct') }}">
                 <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
@@ -54,6 +55,7 @@
                 Надрукувати звіт
             </button>
         </div>
+        {% endif %}
     </div>
 
     <!-- Таблиця -->
@@ -66,7 +68,9 @@
                 <th class="border border-gray-300 px-4 py-2 text-left">Ціна продажу</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Кількість</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">акційний товар</th>
+                {% if user.position == 'Менеджер' %}
                 <th class="border border-gray-300 px-4 py-2 text-left">...</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
@@ -79,6 +83,7 @@
                 <td class="border border-gray-300 px-4 py-2">{{ product.quantity }}</td>  <!-- Кількість товару -->
                 <td class="border border-gray-300 px-4 py-2">{{ 'Так' if product.is_promotional else 'Ні' }}</td>
                 <!-- Акційний товар -->
+                {% if user.position == 'Менеджер' %}
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
                         <a href="/storeproducts/edit/{{ product.upc }}"
@@ -89,16 +94,15 @@
                         </form>
                     </div>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="6" class="text-center py-4">Немає товарів для відображення</td>
+                <td colspan="{{ 6 if user.position == 'Менеджер' else 5 }}" class="text-center py-4">Немає товарів для відображення</td>
             </tr>
             {% endif %}
             </tbody>
-
-
         </table>
     </div>
 </div>

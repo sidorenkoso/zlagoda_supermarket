@@ -5,28 +5,38 @@
     <h1 class="text-4xl font-bold mb-6 text-center">Усі товари</h1>
 
     <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center">
-            <p class="mr-4 ml-4 text-lg">Знайти за категорією</p>
-            <form method="GET" action="{{ url_for('views.products') }}" class="flex items-center" id="search-form">
-                <select name="category"
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Виберіть категорію</option>
-                    {% for category in categories %}
-                    <option value="{{ category.category_number }}" {% if request.args.get(
-                    'category') == category.category_number %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук
-                </button>
-            </form>
-
+        <div class="flex flex-col ml-4">
+            <div class="flex items-center mb-2">
+                <p class="mr-3 text-lg">Знайти за категорією</p>
+                <form method="GET" action="{{ url_for('views.products') }}" class="flex items-center" id="search-form">
+                    <select name="category"
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Виберіть категорію</option>
+                        {% for category in categories %}
+                        <option value="{{ category.category_number }}" {% if request.args.get('category') == category.category_number %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук</button>
+                </form>
+            </div>
+            <!-- Додано поле пошуку за назвою -->
+            <div class="flex items-center">
+                <p class="mr-4 text-lg">Пошук за назвою</p>
+                <form method="GET" action="{{ url_for('views.products') }}" class="flex items-center">
+                    <input type="text" name="search" placeholder="Назва товару"
+                           value="{{ request.args.get('search', '') }}"
+                           class="w-70 px-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук</button>
+                </form>
+            </div>
         </div>
 
+        <!-- Кнопки доступні лише для менеджера -->
+        {% if user.position == 'Менеджер' %}
         <div class="flex space-x-4">
             <a href="{{ url_for('views.add_product') }}">
                 <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                         fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                               d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                               clip-rule="evenodd"/>
@@ -34,10 +44,9 @@
                     Додати
                 </button>
             </a>
-            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
-                Надрукувати звіт
-            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">Надрукувати звіт</button>
         </div>
+        {% endif %}
     </div>
 
     <!-- Таблиця товарів -->
@@ -45,25 +54,14 @@
         <table class="min-w-full border-collapse border border-gray-300">
             <thead>
             <tr class="bg-gray-100">
-                <th class="border border-gray-300 px-4 py-2 text-left"><a
-                        href="{{ url_for('views.products', sort='id') }}" class="hover:underline">
-                    #
-                </a></th>
-                <th class="border border-gray-300 px-4 py-2 text-left">
-                    <a href="{{ url_for('views.products', search=request.args.get('search'), sort='name', order='asc' if request.args.get('order') == 'desc' else 'desc') }}"
-                       class="hover:underline">
-                        Назва
-                        {% if request.args.get('sort') == 'name' %}
-                        {% if request.args.get('order') == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                    </a>
-                </th>
-                <th class="border border-gray-300 px-4 py-2 text-left">
-                    Виробник
-                </th>
+                <th class="border border-gray-300 px-4 py-2 text-left">#</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Назва</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Виробник</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Характеристика</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Категорія</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">...</th>
+                {% if user.position == 'Менеджер' %}
+                <th class="border border-gray-300 px-4 py-2 text-left">Дії</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
@@ -75,22 +73,21 @@
                 <td class="border border-gray-300 px-4 py-2">{{ product.manufacturer }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ product.specifications }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ product.category.name }}</td>
+                {% if user.position == 'Менеджер' %}
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
-                        <a href="{{ url_for('views.edit_product', product_id=product.id) }}"
-                           class="text-blue-600 hover:underline">Редагувати</a>
-
-                        <form method="POST" action="{{ url_for('views.delete_product', product_id=product.id) }}"
-                              onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?')" class="inline">
+                        <a href="{{ url_for('views.edit_product', product_id=product.id) }}" class="text-blue-600 hover:underline">Редагувати</a>
+                        <form method="POST" action="{{ url_for('views.delete_product', product_id=product.id) }}" onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?')" class="inline">
                             <button type="submit" class="text-red-600 hover:underline">Видалити</button>
                         </form>
                     </div>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="5" class="border border-gray-300 px-4 py-2 text-center">Немає результатів</td>
+                <td colspan="6" class="border border-gray-300 px-4 py-2 text-center">Немає результатів</td>
             </tr>
             {% endif %}
             </tbody>

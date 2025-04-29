@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Постійні Клієнти{% endblock %}
+
 {% block content %}
 <div class="py-4">
     <h1 class="text-4xl font-bold mb-6 text-center">Постійні Клієнти</h1>
 
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
+            {% if user.position == 'Менеджер' %}
             <p class="mr-4 ml-4 text-lg">Знайти за % знижки</p>
+            {% elif user.position == 'Касир' %}
+            <p class="mr-4 ml-4 text-lg">Знайти за прізвищем</p>
+            {% endif %}
             <form method="GET" action="{{ url_for('views.clients') }}" class="flex items-center" id="search-form">
                 <input
                         type="text"
@@ -20,11 +25,11 @@
             </form>
         </div>
 
+        {% if user.position == 'Менеджер' %}
         <div class="flex space-x-4">
             <a href="{{ url_for('views.add_client') }}">
                 <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                         fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                               d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                               clip-rule="evenodd"/>
@@ -36,6 +41,7 @@
                 Надрукувати звіт
             </button>
         </div>
+        {% endif %}
     </div>
 
     <!-- Таблиця -->
@@ -63,33 +69,34 @@
             {% for client in clients %}
             <tr>
                 <td class="border border-gray-300 px-4 py-2">{{ client.card_number }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ client.last_name }} {{ client.first_name }} {{
-                    client.middle_name }}
-                </td>
+                <td class="border border-gray-300 px-4 py-2">{{ client.last_name }} {{ client.first_name }} {{ client.middle_name }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ client.phone }}</td>
                 <td class="border border-gray-300 px-4 py-2">
                     {{ (client.city or '') + (', ' if client.city and client.street else '') + (client.street or '') +
-                    (', ' if (client.city or client.street) and client.postal_code else '') + (client.postal_code or '')
-                    }}
+                    (', ' if (client.city or client.street) and client.postal_code else '') + (client.postal_code or '') }}
                 </td>
                 <td class="border border-gray-300 px-4 py-2">{{ client.discount_percent }}</td>
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
                         <a href="/clients/edit/{{ client.card_number }}" class="text-blue-600 hover:underline">Редагувати</a>
+                        {% if user.position == 'Менеджер' %}
                         <form method="POST"
                               action="{{ url_for('views.delete_client', card_number=client.card_number) }}"
                               onsubmit="return confirmDeleteClient()" class="inline">
                             <button type="submit" class="text-red-600 hover:underline">Видалити</button>
                         </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
             {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-4 text-gray-500">Клієнтів не знайдено</td>
+            </tr>
             {% endif %}
             </tbody>
         </table>
     </div>
 </div>
-
-<script src="{{ url_for('static', filename='index.js') }}"></script>
 {% endblock %}
