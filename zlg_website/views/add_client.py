@@ -7,8 +7,6 @@ import random
 @views.route('/clients/add', methods=['GET', 'POST'])
 @login_required
 def add_client():
-    if current_user.position != 'Менеджер':
-        abort(403)
 
     # Генеруємо унікальний номер — і для GET, і для POST
     existing_numbers = {c.card_number for c in CustomerCard.query.all()}

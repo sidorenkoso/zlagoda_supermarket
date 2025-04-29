@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Товари категорії: "{{ category.name }}"</h1>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full border-collapse border border-gray-300">
+        <thead>
+        <tr class="bg-gray-100">
+            <th class="border px-4 py-2">#</th>
+            <th class="border px-4 py-2">Назва</th>
+            <th class="border px-4 py-2">Виробник</th>
+            <th class="border px-4 py-2">Характеристика</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if products %}
+            {% for product in products %}
+                <tr>
+                    <td class="border px-4 py-2">{{ product.id }}</td>
+                    <td class="border px-4 py-2">{{ product.name }}</td>
+                    <td class="border px-4 py-2">{{ product.manufacturer }}</td>
+                    <td class="border px-4 py-2">{{ product.specifications }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4" class="border px-4 py-2 text-center">Немає товарів у цій категорії</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Кнопка повернення -->
+<div class="mt-6">
+    <a href="{{ url_for('views.categories') }}"
+       class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+        ← Повернутися до категорій
+    </a>
+</div>
+
+{% endblock %}

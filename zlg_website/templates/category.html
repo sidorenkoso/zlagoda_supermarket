@@ -6,58 +6,68 @@
 
     <div class="max-w-5xl mx-auto">
         <div class="flex justify-end mb-5">
-            <a href="{{ url_for('views.add_category') }}" class=" ml-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none">
+            <a href="{{ url_for('views.add_category') }}"
+               class=" ml-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none">
                 Додати нову категорію
             </a>
-            <a href="{{ url_for('views.print_categories_report') }}" class="ml-4 px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none"
-            onclick="return confirmPrint()"> Надрукувати звіт </a>
+            <a href="{{ url_for('views.print_categories_report') }}"
+               class="ml-4 px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none"
+               onclick="return confirmPrint()"> Надрукувати звіт </a>
 
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 px-4 py-2 text-left">
-                            <a href="{{ url_for('views.categories', sort='number') }}" class="hover:underline">
-                                #
-                            </a>
-                        </th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">
-                            <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}" class="hover:underline">
-                                Назва
-                            </a>
-                        </th>
-                         <th class="border border-gray-300 px-4 py-2 text-left">
-                            <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}" class="hover:underline">
-                            </a>
-                        </th>
-                         <th class="border border-gray-300 px-4 py-2 text-left">
-                            <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}" class="hover:underline">
-                            </a>
-                        </th>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.categories', sort='number') }}" class="hover:underline">
+                            #
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}"
+                           class="hover:underline">
+                            Назва {% if request.args.get('sort') == 'name' %}
+                            {% if request.args.get('order') == 'asc' %}▲{% else %}▼{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}"
+                           class="hover:underline">
+                        </a>
+                    </th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">
+                        <a href="{{ url_for('views.categories', sort='name', order='desc' if sort == 'name' and order == 'asc' else 'asc') }}"
+                           class="hover:underline">
+                        </a>
+                    </th>
 
-                        <th class="border border-gray-300 px-4 py-2" colspan="3"></th>
-                    </tr>
+                    <th class="border border-gray-300 px-4 py-2" colspan="3"></th>
+                </tr>
                 </thead>
 
                 <tbody>
-                    {% for category in categories %}
-                    <tr>
-                        <td class="border border-gray-300 px-4 py-2">{{ category.category_number }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ category.name }}</td>
-                        <td class="border border-gray-300 px-4 py-2 text-center">
-                            <a href="{{ url_for('views.view_category', category_id=category.category_number) }}" class="text-blue-600 hover:text-blue-800">Переглянути</a>
-                        </td>
-                        <td class="border border-gray-300 px-4 py-2 text-center">
-                            <a href="{{ url_for('views.edit_category', category_id=category.category_number) }}" class="text-blue-600 hover:text-blue-800">Редагувати</a>
-                        </td>
-                        <td class="border border-gray-300 px-4 py-2 text-center">
-                            <a href="{{ url_for('views.delete_category', category_id=category.category_number) }}" class="text-red-600 hover:text-red-800"
-                              onclick="return confirmDeleteCategory()" >Видалити</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for category in categories %}
+                <tr>
+                    <td class="border border-gray-300 px-4 py-2">{{ category.category_number }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ category.name }}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        <a href="{{ url_for('views.view_category', category_id=category.category_number) }}"
+                           class="text-blue-600 hover:text-blue-800">Переглянути</a>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        <a href="{{ url_for('views.edit_category', category_id=category.category_number) }}"
+                           class="text-blue-600 hover:text-blue-800">Редагувати</a>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2 text-center">
+                        <a href="{{ url_for('views.delete_category', category_id=category.category_number) }}"
+                           class="text-red-600 hover:text-red-800"
+                           onclick="return confirmDeleteCategory()">Видалити</a>
+                    </td>
+                </tr>
+                {% endfor %}
 
                 <script src="{{ url_for('static', filename='index.js') }}"></script>
                 </tbody>

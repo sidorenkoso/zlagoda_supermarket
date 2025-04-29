@@ -9,6 +9,7 @@ def products():
     category_number = request.args.get('category')
     sort = request.args.get('sort')
     order = request.args.get('order', 'asc')
+    search_query = request.args.get('search', '')
 
     query = Product.query
 
@@ -32,7 +33,16 @@ def products():
         query = query.order_by(Product.id.asc())  # За замовчуванням — за id
 
     products = query.all()
+
+    if search_query:
+        search_lower = search_query.lower()
+        products = [
+            product for product in products
+            if search_lower in product.name.lower()
+        ]
+
     categories = Category.query.all()
 
-    return render_template("products.html", user=current_user, products=products, categories=categories, sort=sort, order=order, category_number=category_number)
+    return render_template("products.html", user=current_user, products=products, categories=categories, sort=sort, order=order, category_number=category_number,
+        search_query=search_query)
 

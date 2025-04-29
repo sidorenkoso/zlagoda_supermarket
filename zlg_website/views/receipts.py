@@ -17,9 +17,9 @@ def receipts():
 
     # Базовий запит
     query = Receipt.query
-
-    # Застосовуємо фільтри
-    if employee_id:
+    if current_user.position == 'Касир':
+        query = query.filter(Receipt.employee_id == current_user.id)
+    elif employee_id:
         query = query.filter(Receipt.employee_id == employee_id)
 
     if date_from:

@@ -6,8 +6,6 @@ from . import views  # існуючий Blueprint
 @views.route('/clients/edit/<string:client_id>', methods=['GET', 'POST'])
 @login_required
 def edit_client(client_id):
-    if current_user.position != 'Менеджер':
-        abort(403)
 
     client = CustomerCard.query.get_or_404(client_id)
 

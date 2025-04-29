@@ -4,13 +4,15 @@
 <div class="py-4 max-w-4xl mx-auto">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-center mb-6">Чек №{{ receipt.receipt_number }}</h1>
-        
+
         <div class="flex justify-between items-center mb-4">
             <div>
                 <p class="text-lg"><strong>Дата:</strong> {{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</p>
-                <p class="text-lg"><strong>Касир:</strong> {{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</p>
+                <p class="text-lg"><strong>Касир:</strong> {{ receipt.employee.last_name }} {{
+                    receipt.employee.first_name }}</p>
                 {% if receipt.customer_card %}
-                <p class="text-lg"><strong>Клієнт:</strong> {{ receipt.customer_card.last_name }} {{ receipt.customer_card.first_name }}</p>
+                <p class="text-lg"><strong>Клієнт:</strong> {{ receipt.customer_card.last_name }} {{
+                    receipt.customer_card.first_name }}</p>
                 <p class="text-lg"><strong>Картка клієнта:</strong> {{ receipt.customer_card_number }}</p>
                 {% endif %}
             </div>
@@ -21,22 +23,24 @@
     <div class="overflow-x-auto mb-6">
         <table class="min-w-full border-collapse border border-gray-300">
             <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2 text-left">Товар</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Кількість</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Ціна за одиницю</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Загальна ціна</th>
-                </tr>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2 text-left">Товар</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Кількість</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Ціна за одиницю</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Загальна ціна</th>
+            </tr>
             </thead>
             <tbody>
-                {% for item in receipt.items %}
-                <tr>
-                    <td class="border border-gray-300 px-4 py-2">{{ item.store_product.product.name }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ item.quantity }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ item.store_product.price }} грн</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ item.quantity * item.store_product.price }} грн</td>
-                </tr>
-                {% endfor %}
+            {% for item in receipt.items %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2">{{ item.store_product.product.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ item.quantity }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ item.store_product.price }} грн</td>
+                <td class="border border-gray-300 px-4 py-2">{{ "%.2f"|format(item.quantity * item.store_product.price)
+                    }} грн
+                </td>
+            </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
@@ -45,11 +49,14 @@
         <a href="{{ url_for('views.receipts') }}" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
             Повернутися назад
         </a>
-        
+
         <div class="text-right">
-            <p class="text-lg"><strong>Сума без ПДВ:</strong> {{ receipt.total_sum - receipt.vat }} грн</p>
-            <p class="text-lg"><strong>ПДВ:</strong> {{ receipt.vat }} грн</p>
-            <p class="text-xl font-bold mt-2"><strong>Загальна сума:</strong> {{ receipt.total_sum }} грн</p>
+            <p class="text-lg"><strong>Сума без ПДВ:</strong> {{ "%.2f"|format(receipt.total_sum - receipt.vat) }}
+                грн</p>
+            <p class="text-lg"><strong>ПДВ:</strong> {{ "%.2f"|format(receipt.vat) }}
+                грн</p>
+            <p class="text-xl font-bold mt-2"><strong>Загальна сума:</strong> {{ "%.2f"|format(receipt.total_sum) }}
+                грн</p>
         </div>
     </div>
 </div>

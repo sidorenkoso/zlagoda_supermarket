@@ -24,7 +24,7 @@
                 </a>
             </div>
 
-            <p class="mr-4 ml-4 text-lg">Пошук за UPC або назвою</p>
+            <p class="mr-4 ml-4 text-lg">Пошук за UPC</p>
             <form method="GET" action="{{ url_for('views.storeproducts') }}" class="flex items-center" id="search-form">
                 <input
                         type="text"
@@ -64,9 +64,44 @@
             <thead>
             <tr class="bg-gray-100">
                 <th class="border border-gray-300 px-4 py-2 text-left">#UPC</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Назва</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">
+                    <a href="{{ url_for('views.storeproducts',
+                        sort='name',
+                        order='desc' if request.args.get('sort') == 'name' and request.args.get('order') == 'asc' else 'asc',
+                        search=request.args.get('search'),
+                        category=request.args.get('category')) }}"
+                       class="hover:underline">
+                        Назва
+                        {% if request.args.get('sort') == 'name' %}
+                        {% if request.args.get('order') == 'asc' %}
+                        ▲
+                        {% else %}
+                        ▼
+                        {% endif %}
+                        {% endif %}
+                    </a>
+                </th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Ціна продажу</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Кількість</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">
+                    <a href="{{ url_for('views.storeproducts',
+                        sort='quantity',
+                        order='desc' if request.args.get('sort') == 'quantity' and request.args.get('order') == 'asc' else 'asc',
+                        search=request.args.get('search'),
+                        category=request.args.get('category'),
+                        promo=request.args.get('promo')) }}"
+                       class="hover:underline">
+                        Кількість
+                        {% if request.args.get('sort') == 'quantity' %}
+                        {% if request.args.get('order') == 'asc' %}
+                        ▲
+                        {% else %}
+                        ▼
+                        {% endif %}
+                        {% endif %}
+                    </a>
+                </th>
+
+
                 <th class="border border-gray-300 px-4 py-2 text-left">акційний товар</th>
                 {% if user.position == 'Менеджер' %}
                 <th class="border border-gray-300 px-4 py-2 text-left">...</th>
@@ -99,7 +134,9 @@
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="{{ 6 if user.position == 'Менеджер' else 5 }}" class="text-center py-4">Немає товарів для відображення</td>
+                <td colspan="{{ 6 if user.position == 'Менеджер' else 5 }}" class="text-center py-4">Немає товарів для
+                    відображення
+                </td>
             </tr>
             {% endif %}
             </tbody>

@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, abort
+from flask import Blueprint, render_template, request, abort, redirect, url_for, flash
 from flask_login import login_required, current_user
-from zlg_website.models import Category  # імпорт моделі Category
+from zlg_website.models import Category, Product  # імпорт моделі Category
 from . import views
+from .. import db
+
 
 @views.route('/categories')
 @login_required
@@ -42,4 +44,11 @@ def categories():
 @login_required
 def view_category(category_id):
     category = Category.query.get_or_404(category_id)
-    return render_template('products_in_category.html', category=category, user=current_user)
+    if not category:
+        flash('Категорія не знайдена', 'danger')
+        return redirect(url_for('views.categories'))
+
+    products = Product.query.filter_by(category_number=category_id).all()
+    return render_template('products_in_category.html', category=category, products=products, user=current_user)
+
+
