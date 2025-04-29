@@ -10,9 +10,10 @@
                class=" ml-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none">
                 Додати нову категорію
             </a>
-            <a href="{{ url_for('views.print_categories_report') }}"
-               class="ml-4 px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none"
-               onclick="return confirmPrint()"> Надрукувати звіт </a>
+            <a href="#" id="printButton"
+                class="ml-4 px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none">
+                    Надрукувати звіт
+            </a>
 
         </div>
 
@@ -70,6 +71,29 @@
                 {% endfor %}
 
                 <script src="{{ url_for('static', filename='index.js') }}"></script>
+
+                <script>
+            document.getElementById('printButton').addEventListener('click', function () {
+            const printWindow = window.open('', 'printWindow', 'width=800,height=600');
+
+            fetch("{{ url_for('views.print_categories_report') }}")
+                .then(response => response.text())
+                .then(html => {
+                    printWindow.document.open();
+                    printWindow.document.write(html);
+                    printWindow.document.close();
+
+                    printWindow.onload = function () {
+                    printWindow.focus();
+                    printWindow.print();
+                };
+            })
+            .catch(error => {
+            console.error('Помилка під час отримання звіту:', error);
+            alert('Не вдалося завантажити звіт для друку.');
+            });
+            });
+            </script>
                 </tbody>
             </table>
         </div>

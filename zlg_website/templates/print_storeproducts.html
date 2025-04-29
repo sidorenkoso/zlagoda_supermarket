@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <title></title>
+</head>
+<body class="bg-gray-100">
+
+{% block content %}
+<div class="py-4">
+    <h1 class="text-4xl font-bold mb-6 text-center">Товари в Магазині</h1>
+
+    <!-- Таблиця товарів у магазині -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse border border-gray-300">
+            <thead>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2 text-left">UPC</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">
+                    <a href="{{ url_for('views.storeproducts', search=request.args.get('search'), sort='name', order='asc' if request.args.get('order') == 'desc' else 'desc') }}"
+                       class="hover:underline">
+                        Назва товару {% if request.args.get('sort') == 'name' %}
+                        {% if request.args.get('order') == 'asc' %}▲{% else %}▼{% endif %}
+                        {% endif %}
+                    </a>
+                </th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Ціна</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Категорія</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Кількість на складі</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Акційний товар</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if products %}
+            {% for product in products %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2">{{ product.upc }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.product.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.price }} грн</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.product.category.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.quantity }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ 'Так' if product.is_promotional else 'Ні' }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-4 text-gray-500">Товари не знайдено</td>
+            </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Якщо потрібно додати якусь функціональність для друку чи інших дій, додайте тут
+</script>
+
+{% endblock %}
+
+</body>
+</html>

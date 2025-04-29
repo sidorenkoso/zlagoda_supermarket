@@ -4,39 +4,41 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 
 </head>
-<body class="bg-white text-black">
 
-{% block content %}
-    <div class="print-container">
-        <h1 class="text-2xl font-bold text-center mb-4">Звіт по чеках</h1>
-        
-        <table class="min-w-full border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2 text-left">#</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Дата</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Загальна сума</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">ПДВ</th>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Касир</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if receipts %}
-                    {% for receipt in receipts %}
-                        <tr>
-                            <td class="border border-gray-300 px-4 py-2">{{ receipt.receipt_number }}</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="border border-gray-300 px-4 py-2 text-center">Немає чеків для друку</td>
+<body class="bg-white text-black">
+    {% block content %}
+        <div class="print-container">
+            <h1 class="text-2xl font-bold text-center mb-4">Звіт по чеках</h1>
+
+            <!-- Таблиця звіту -->
+            <table class="min-w-full border-collapse border border-gray-300 mt-4">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-4 py-2 text-left">#</th>
+                        <th class="border border-gray-300 px-4 py-2 text-left">Дата</th>
+                        <th class="border border-gray-300 px-4 py-2 text-left">Загальна сума</th>
+                        <th class="border border-gray-300 px-4 py-2 text-left">ПДВ</th>
+                        <th class="border border-gray-300 px-4 py-2 text-left">Касир</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-{% endblock %}
+                </thead>
+                <tbody>
+                    {% if receipts %}
+                        {% for receipt in receipts %}
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.receipt_number }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="border border-gray-300 px-4 py-2 text-center">Немає чеків для друку</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    {% endblock %}
+</body>

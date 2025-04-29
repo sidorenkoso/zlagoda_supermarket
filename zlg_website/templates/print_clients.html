@@ -1,50 +1,16 @@
-{% extends "base.html" %}
-{% block title %}Постійні Клієнти{% endblock %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <title>Постійні Клієнти</title>
+</head>
+<body class="bg-gray-100">
 
 {% block content %}
 <div class="py-4">
     <h1 class="text-4xl font-bold mb-6 text-center">Постійні Клієнти</h1>
-
-    <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center">
-            {% if user.position == 'Менеджер' %}
-            <p class="mr-4 ml-4 text-lg">Знайти за % знижки</p>
-            {% elif user.position == 'Касир' %}
-            <p class="mr-4 ml-4 text-lg">Знайти за прізвищем</p>
-            {% endif %}
-            <form method="GET" action="{{ url_for('views.clients') }}" class="flex items-center" id="search-form">
-                <input
-                        type="text"
-                        name="search"
-                        placeholder="Пошук..."
-                        value="{{ request.args.get('search', '') }}"
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Пошук
-                </button>
-            </form>
-        </div>
-
-        <div class="flex space-x-4">
-            <a href="{{ url_for('views.add_client') }}">
-                <button class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                              clip-rule="evenodd"/>
-                    </svg>
-                    Додати
-                </button>
-            </a>
-            {% if user.position == 'Менеджер' %}
-            <form id="printReportForm">
-                <button type="button" id="printButton"  class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
-                    Надрукувати звіт
-                </button>
-            </form>
-            {% endif %}
-        </div>
-    </div>
 
     <!-- Таблиця -->
     <div class="overflow-x-auto">
@@ -63,7 +29,6 @@
                 <th class="border border-gray-300 px-4 py-2 text-left">Телефон</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Адреса</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">% знижки</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">...</th>
             </tr>
             </thead>
             <tbody>
@@ -78,18 +43,6 @@
                     (', ' if (client.city or client.street) and client.postal_code else '') + (client.postal_code or '') }}
                 </td>
                 <td class="border border-gray-300 px-4 py-2">{{ client.discount_percent }}</td>
-                <td class="border border-gray-300 px-4 py-2">
-                    <div class="flex flex-col space-y-1">
-                        <a href="/clients/edit/{{ client.card_number }}" class="text-blue-600 hover:underline">Редагувати</a>
-                        {% if user.position == 'Менеджер' %}
-                        <form method="POST"
-                              action="{{ url_for('views.delete_client', card_number=client.card_number) }}"
-                              onsubmit="return confirmDeleteClient()" class="inline">
-                            <button type="submit" class="text-red-600 hover:underline">Видалити</button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </td>
             </tr>
             {% endfor %}
             {% else %}
@@ -126,3 +79,6 @@
             </script>
 
 {% endblock %}
+
+</body>
+</html>
