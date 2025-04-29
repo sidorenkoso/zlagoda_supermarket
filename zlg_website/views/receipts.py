@@ -33,12 +33,7 @@ def receipts():
         query = query.filter(Receipt.date < date_to)
 
     # Застосовуємо сортування
-    if sort == 'receipt_number':
-        if order == 'asc':
-            query = query.order_by(Receipt.receipt_number.asc())
-        else:
-            query = query.order_by(Receipt.receipt_number.desc())
-    elif sort == 'date':
+    if sort == 'date':
         if order == 'asc':
             query = query.order_by(Receipt.date.asc())
         else:
@@ -58,7 +53,9 @@ def receipts():
         user=current_user,
         receipts=receipts,
         employees=employees,
-        total_sum=total_sum
+        total_sum=total_sum,
+        sort=sort,
+        order=order
     )
 
 
