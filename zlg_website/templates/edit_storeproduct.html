@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Додати товар у наявність{% endblock %}
+
+{% block title %}Редагувати товар у наявності{% endblock %}
 
 {% block content %}
 <div class="py-8 max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-center mb-8">Додати товар у наявність</h1>
+    <h1 class="text-3xl font-bold text-center mb-8">Редагувати товар у наявності</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -15,49 +16,51 @@
         {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('views.add_storeproduct') }}" method="POST" class="space-y-6">
-
+    <form action="{{ url_for('views.edit_storeproduct', upc=storeproduct.upc) }}" method="POST" class="space-y-6">
         <div>
             <label for="product_id" class="block mb-2 text-lg">Назва товару</label>
-            <select id="product_id" name="product_id" required
-                    class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="" disabled selected>Оберіть товар</option>
-                {% for product in products %}
-                    <option value="{{ product.id }}">{{ product.name }}</option>
-                {% endfor %}
-            </select>
+            <input type="text" id="product_id" name="upc" required value="{{ storeproduct.product.name }}"
+                   class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
         </div>
 
         <div>
             <label for="upc" class="block mb-2 text-lg">UPC</label>
-            <input type="text" id="upc" name="upc" required
-                   class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="upc" name="upc" required value="{{ storeproduct.upc }}"
+                   class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label for="price" class="block mb-2 text-lg">Ціна</label>
-                <input type="number" step="0.01" id="price" name="price" required min="0"
+                <input type="number" step="0.01" id="price" name="price" required min="0" value="{{ storeproduct.price }}"
                        class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div>
                 <label for="quantity" class="block mb-2 text-lg">Кількість</label>
-                <input type="number" id="quantity" name="quantity" required min="0"
+                <input type="number" id="quantity" name="quantity" required min="0" value="{{ storeproduct.quantity }}"
                        class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
 
         <div>
             <label for="expiration_date" class="block mb-2 text-lg">Дата придатності</label>
-            <input type="date" id="expiration_date" name="expiration_date"
+            <input type="date" id="expiration_date" name="expiration_date" value="{{ storeproduct.expiration_date }}"
                    class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+            <label for="is_promotional" class="flex items-center space-x-2 text-lg">
+                <input type="checkbox" id="is_promotional" name="is_promotional" {% if storeproduct.is_promotional %}checked{% endif %}
+                       class="form-checkbox h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500">
+                <span>Акційний товар</span>
+            </label>
         </div>
 
         <div class="flex justify-center space-x-4 mt-8">
             <button type="submit"
                     class="px-10 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Додати
+                Зберегти зміни
             </button>
             <a href="{{ url_for('views.storeproducts') }}"
                class="px-10 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
@@ -73,8 +76,6 @@
         fetch(`/storeproducts/fetch/${productId}`)
             .then(response => response.json())
             .then(data => {
-                document.getElementById('upc').value = data.upc;
-                document.getElementById('upc').readOnly = data.exists;
                 document.getElementById('price').value = data.price || '';
                 document.getElementById('expiration_date').value = data.expiration_date || '';
                 document.getElementById('quantity').value = '';

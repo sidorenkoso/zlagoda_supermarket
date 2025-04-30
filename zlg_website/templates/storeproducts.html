@@ -116,14 +116,17 @@
             <tr>
                 <td class="border border-gray-300 px-4 py-2">{{ product.upc }}</td>  <!-- UPC товару -->
                 <td class="border border-gray-300 px-4 py-2">{{ product.product.name }}</td>  <!-- Назва товару -->
-                <td class="border border-gray-300 px-4 py-2">{{ product.price }}</td>  <!-- Ціна товару -->
+                <td class="border border-gray-300 px-4 py-2">
+    {{ product.promo_price if product.is_promotional and product.promo_price else product.price }}
+</td>
+
                 <td class="border border-gray-300 px-4 py-2">{{ product.quantity }}</td>  <!-- Кількість товару -->
                 <td class="border border-gray-300 px-4 py-2">{{ 'Так' if product.is_promotional else 'Ні' }}</td>
                 <!-- Акційний товар -->
                 {% if user.position == 'Менеджер' %}
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
-                        <a href="/storeproducts/edit/{{ product.upc }}"
+                        <a href="{{ url_for('views.edit_storeproduct', upc=product.upc) }}"
                            class="text-blue-600 hover:underline">Редагувати</a>
                         <form method="POST" action="{{ url_for('views.delete_storeproduct', upc=product.upc) }}"
                               onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?')" class="inline">
