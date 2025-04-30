@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}Редагувати працівника{% endblock %}
+{% block title %}{% if employee %}Редагувати працівника{% else %}Додати нового працівника{% endif %}{% endblock %}
 {% block content %}
 <div class="py-4">
     <h1 class="text-4xl font-bold mb-6 text-center">Працівники</h1>
 
     <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6">Редагувати працівника</h2>
+        <h2 class="text-2xl font-bold mb-6">{% if employee %}Редагувати працівника{% else %}Додати нового працівника{% endif %}</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
         {% endwith %}
 
-        <form action="{{ url_for('views.edit_employee', id=employee.id) }}" method="POST" class="space-y-6">
+        <form action="{% if employee %}{{ url_for('views.edit_employee', id=employee.id) }}{% else %}{{ url_for('views.add_employee') }}{% endif %}" method="POST" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
-                    <label class="block mb-2 text-lg">id</label>
-                    <input type="text" value="{{ employee.id }}" readonly
+                    <label class="block mb-2 text-lg">ID</label>
+                    <input type="text" name="id" value="{% if employee %}{{ employee.id }}{% else %}{{ next_id }}{% endif %}" readonly
                            class="w-full px-4 py-2 bg-gray-300 border border-gray-400 rounded-lg cursor-not-allowed">
                 </div>
 
                 <div class="md:col-span-2">
                     <label for="full_name" class="block mb-2 text-lg">ПІБ</label>
-                    <input type="text" id="full_name" name="full_name" value="{{ employee.full_name }}" required
+                    <input type="text" id="full_name" name="full_name" value="{% if employee %}{{ employee.full_name }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
@@ -35,8 +35,8 @@
                     <label for="position" class="block mb-2 text-lg">Посада</label>
                     <select id="position" name="position" required
                             class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="Менеджер" {% if employee.position == 'Менеджер' %}selected{% endif %}>Менеджер</option>
-                        <option value="Касир" {% if employee.position == 'Касир' %}selected{% endif %}>Касир</option>
+                        <option value="Менеджер" {% if employee and employee.position == 'Менеджер' %}selected{% endif %}>Менеджер</option>
+                        <option value="Касир" {% if employee and employee.position == 'Касир' %}selected{% endif %}>Касир</option>
                     </select>
                 </div>
             </div>
@@ -44,19 +44,22 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label for="birth_date" class="block mb-2 text-lg">День народження</label>
-                    <input type="date" id="birth_date" name="birth_date" value="{{ employee.birth_date.strftime('%Y-%m-%d') }}" required
+                    <input type="date" id="birth_date" name="birth_date"
+                           value="{% if employee %}{{ employee.birth_date.strftime('%Y-%m-%d') }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label for="start_date" class="block mb-2 text-lg">Дата початку</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ employee.start_date.strftime('%Y-%m-%d') }}" required
+                    <input type="date" id="start_date" name="start_date"
+                           value="{% if employee %}{{ employee.start_date.strftime('%Y-%m-%d') }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label for="salary" class="block mb-2 text-lg">Зарплата</label>
-                    <input type="number" id="salary" name="salary" value="{{ employee.salary }}" required min="0"
+                    <input type="number" id="salary" name="salary" min="0" step="0.01"
+                           value="{% if employee %}{{ employee.salary }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
@@ -64,13 +67,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="phone" class="block mb-2 text-lg">Телефон</label>
-                    <input type="tel" id="phone" name="phone" value="{{ employee.phone }}" required
+                    <input type="tel" id="phone" name="phone"
+                           value="{% if employee %}{{ employee.phone }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label for="address" class="block mb-2 text-lg">Адреса</label>
-                    <input type="text" id="address" name="address" value="{{ employee.address }}" required
+                    <input type="text" id="address" name="address"
+                           value="{% if employee %}{{ employee.address }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
@@ -78,23 +83,29 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="email" class="block mb-2 text-lg">Email</label>
-                    <input type="email" id="email" name="email" value="{{ employee.email }}" required
+                    <input type="email" id="email" name="email"
+                           value="{% if employee %}{{ employee.email }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
-                    <label for="password" class="block mb-2 text-lg">Новий пароль (не обов’язково)</label>
+                    <label for="password" class="block mb-2 text-lg">
+                        {% if employee %}Новий пароль (не обов’язково){% else %}Пароль{% endif %}
+                    </label>
                     <input type="password" id="password" name="password"
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           {% if not employee %}required{% endif %}
                            placeholder="••••••••">
                 </div>
             </div>
 
             <div class="flex justify-center space-x-4 mt-8">
-                <button type="submit" class="px-10 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    Зберегти зміни
+                <button type="submit"
+                        class="px-10 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    {% if employee %}Зберегти зміни{% else %}Додати{% endif %}
                 </button>
-                <a href="{{ url_for('views.employees') }}" class="px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                <a href="{{ url_for('views.employees') }}"
+                   class="px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                     Повернутися назад
                 </a>
             </div>

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ mode == 'edit' and 'Редагувати картку' or 'Додати нову картку' }} постійного клієнта{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h1 class="text-4xl font-bold mb-6 text-center">Постійні клієнти</h1>
+
+    <div class="max-w-5xl mx-auto">
+        <h2 class="text-2xl font-bold mb-6">
+            {{ mode == 'edit' and 'Редагувати картку постійного клієнта' or 'Додати нову картку постійного клієнта' }}
+        </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ mode == 'edit' and url_for('views.edit_client', client_id=client.card_number) or url_for('views.add_client') }}" method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <label for="card_number" class="block mb-2 text-lg">Номер картки</label>
+                    <input type="text" id="card_number" name="card_number"
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none"
+                        value="{{ mode == 'edit' and client.card_number or card_number }}" readonly>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="last_name" class="block mb-2 text-lg">Прізвище</label>
+                    <input type="text" id="last_name" name="last_name" required
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.last_name or '' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="first_name" class="block mb-2 text-lg">Ім'я</label>
+                    <input type="text" id="first_name" name="first_name" required
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.first_name or '' }}">
+                </div>
+
+                <div>
+                    <label for="middle_name" class="block mb-2 text-lg">По батькові</label>
+                    <input type="text" id="middle_name" name="middle_name"
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.middle_name or '' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="phone" class="block mb-2 text-lg">Телефон</label>
+                    <input type="tel" id="phone" name="phone" required
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.phone or '' }}">
+                </div>
+
+                <div>
+                    <label for="city" class="block mb-2 text-lg">Місто</label>
+                    <input type="text" id="city" name="city"
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.city or '' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="street" class="block mb-2 text-lg">Вулиця</label>
+                    <input type="text" id="street" name="street"
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.street or '' }}">
+                </div>
+
+                <div>
+                    <label for="postal_code" class="block mb-2 text-lg">Поштовий індекс</label>
+                    <input type="text" id="postal_code" name="postal_code"
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.postal_code or '' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="discount_percent" class="block mb-2 text-lg">Відсоток знижки</label>
+                    <input type="number" id="discount_percent" name="discount_percent" min="0" step="0.01" required
+                        class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ mode == 'edit' and client.discount_percent or '' }}">
+                </div>
+            </div>
+
+            <div class="flex justify-center space-x-4 mt-8">
+                <button type="submit"
+                    class="px-10 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    {{ mode == 'edit' and 'Зберегти зміни' or 'Додати' }}
+                </button>
+                {% if mode == 'edit' %}
+                <a href="{{ url_for('views.clients') }}"
+                    class="px-10 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    Скасувати
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

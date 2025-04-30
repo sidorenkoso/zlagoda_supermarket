@@ -80,7 +80,7 @@
                 <td class="border border-gray-300 px-4 py-2">{{ client.discount_percent }}</td>
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
-                        <a href="/clients/edit/{{ client.card_number }}" class="text-blue-600 hover:underline">Редагувати</a>
+                        <a href="{{ url_for('views.edit_client', client_id=client.card_number) }}" class="text-blue-600 hover:underline">Редагувати</a>
                         {% if user.position == 'Менеджер' %}
                         <form method="POST"
                               action="{{ url_for('views.delete_client', card_number=client.card_number) }}"
@@ -97,6 +97,9 @@
                 <td colspan="6" class="text-center py-4 text-gray-500">Клієнтів не знайдено</td>
             </tr>
             {% endif %}
+
+            <script src="{{ url_for('static', filename='index.js') }}"></script>
+
             </tbody>
         </table>
     </div>

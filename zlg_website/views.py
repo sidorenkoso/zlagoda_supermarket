@@ -47,7 +47,7 @@ def add_employee_form():
     except Exception as e:
         next_id = 1  # якщо база ще пуста або сталася помилка
 
-    return render_template("add_employee.html", user=current_user, next_id=next_id)
+    return render_template("form_employees.html", user=current_user, next_id=next_id)
 
 
 
@@ -135,7 +135,7 @@ def edit_employee(id):
             flash(f"Помилка при оновленні: {str(e)}", "error")
             return redirect(url_for('views.edit_employee', id=id))
 
-    return render_template("edit_employee.html", user=current_user, employee=employee)
+    return render_template("form_employees.html", user=current_user, employee=employee)
 
 
 

@@ -52,3 +52,63 @@ def view_category(category_id):
     return render_template('products_in_category.html', category=category, products=products, user=current_user)
 
 
+
+@views.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        if not name:
+            flash("Назва не може бути порожньою", 'error')
+        else:
+            category.name = name
+            db.session.commit()
+            flash("Категорію оновлено", 'success')
+            return redirect(url_for('views.categories'))
+    return render_template('form_category.html', category=category, user=current_user)
+
+@views.route('/categories/add', methods=['GET', 'POST'])
+@login_required
+def add_category():
+    if current_user.position != 'Менеджер':
+        abort(403)
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+
+        if not name:
+            flash("Назва категорії не може бути порожньою.", category="error")
+        else:
+            new_category = Category(name=name)
+            db.session.add(new_category)
+            try:
+                db.session.commit()
+                flash("Категорію успішно додано!", category="success")
+                return redirect(url_for('views.categories'))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Помилка при додаванні категорії: {str(e)}", "error")
+                return redirect(url_for("views.add_category"))
+
+    # Обчислюємо next_id тільки якщо GET-запит
+    last_category = Category.query.order_by(Category.category_number.desc()).first()
+    next_id = (last_category.category_number + 1) if last_category else 1
+
+    return render_template("form_category.html", user=current_user, next_id=next_id)
+
+@views.route('/categories/<int:category_id>/delete')
+@login_required
+def delete_category(category_id):
+    category = Category.query.get_or_404(category_id)
+
+    if category.products:
+        flash("Неможливо видалити категорію, оскільки в ній є товари.", 'error')
+        return redirect(url_for('views.categories'))
+
+    db.session.delete(category)
+    db.session.commit()
+    flash("Категорію видалено", 'success')
+    return redirect(url_for('views.categories'))
+
+
