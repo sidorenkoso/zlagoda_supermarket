@@ -54,7 +54,8 @@
             </div>
             {% if user.position == 'Касир' %}
             <div>
-                <a class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                <a href="{{ url_for('views.add_receipts') }}"
+                   class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Додати
                 </a>
             </div>

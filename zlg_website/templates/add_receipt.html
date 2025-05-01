@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Чеки{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6 px-4">
+    <h1 class="text-3xl font-bold text-center mb-6">Чек # <span id="receipt_number">{{ receipt_number }}</span></h1>
+
+    <form method="POST" action="{{ url_for('views.add_receipts') }}">
+        {{ csrf_token() if csrf_token }}
+
+        <!-- Форма даних клієнта -->
+        <div class="grid grid-cols-3 gap-8 mb-8">
+            <div>
+                <label class="block mb-2">Введіть картку клієнта:</label>
+                <input type="text" name="card_number" id="card_number"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block mb-2">Клієнт:</label>
+                <input type="text" id="customer_name" name="customer_name"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    readonly>
+            </div>
+            <div>
+                <label class="block mb-2">% знижки:</label>
+                <input type="text" id="discount_percent" name="discount_percent"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    readonly>
+            </div>
+        </div>
+
+        <!-- Пошук товарів -->
+            <div class="flex items-center mb-6">
+            <div class="mr-4">
+                <label class="block mb-2">Знайти товар:</label>
+                <div class="relative">
+                    <input type="text" id="product_search" class="w-80 px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="searchResults" class="absolute left-0 right-0 bg-white shadow-lg rounded-md mt-1 max-h-60 overflow-y-auto hidden z-10"></div>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <span class="text-lg">/= вибрати зі списку товару</span>
+            </div>
+        </div>
+
+        <!-- Таблиця товарів -->
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="py-2 px-4 text-left border">#</th>
+                        <th class="py-2 px-4 text-left border">Назва товару</th>
+                        <th class="py-2 px-4 text-left border">Ціна (грн)</th>
+                        <th class="py-2 px-4 text-left border">Кількість</th>
+                        <th class="py-2 px-4 text-left border">Сума (грн)</th>
+                        <th class="py-2 px-4 text-left border"></th>
+                    </tr>
+                </thead>
+                <tbody id="receipt_items">
+                    <!-- Рядки будуть додаватися динамічно -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Підсумки -->
+        <div class="flex justify-end mb-6">
+            <div class="w-64">
+                <div class="flex justify-between font-bold text-lg mb-2">
+                    <span>Загальна сума чеку:</span>
+                    <span id="total_sum">0 грн</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Ціна зі знижкою:</span>
+                    <span id="discounted_sum">0 грн</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки дій -->
+        <div class="flex justify-center space-x-4">
+            <button id="save_button" class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Зберегти</button>
+            <button id="cancel_button" class="px-8 py-3 bg-gray-400 text-white rounded-md hover:bg-gray-500 focus:outline-none">Скасувати</button>
+        </div>
+    </form>
+</div>
+
+<script>
+
+    document.getElementById('card_number').addEventListener('input', function () {
+        const cardNumber = this.value.trim();
+        const customerNameInput = document.getElementById('customer_name');
+        const discountInput = document.getElementById('discount_percent');
+
+        if (cardNumber.length === 0) {
+            customerNameInput.value = '';
+            discountInput.value = '';
+            return;
+        }
+
+        fetch(`/api/client_info?card_number=${cardNumber}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Клієнт не знайдений');
+                return response.json();
+            })
+            .then(data => {
+                customerNameInput.value = data.full_name;
+                discountInput.value = data.discount_percent + ' %';
+            })
+            .catch(error => {
+                customerNameInput.value = '';
+                discountInput.value = '';
+                console.error(error);
+            });
+    });
+
+</script>
+
+{% endblock %}
