@@ -71,7 +71,8 @@
                         sort='name',
                         order='desc' if request.args.get('sort') == 'name' and request.args.get('order') == 'asc' else 'asc',
                         search=request.args.get('search'),
-                        category=request.args.get('category')) }}"
+                        category=request.args.get('category'),
+                        promo=request.args.get('promo')) }}"
                        class="hover:underline">
                         Назва
                         {% if request.args.get('sort') == 'name' %}

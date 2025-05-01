@@ -73,6 +73,12 @@ def add_employee():
             position = request.form.get("position")
             salary = request.form.get("salary")
             birth_date = datetime.strptime(request.form.get("birth_date"), "%Y-%m-%d")
+            today = datetime.today()
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
+            if age < 18:
+                flash("Працівнику має бути не менше 18 років!", "error")
+                return redirect(url_for("views.add_employee_form"))
             start_date = datetime.strptime(request.form.get("start_date"), "%Y-%m-%d")
             phone = request.form.get("phone")
             address = request.form.get("address")

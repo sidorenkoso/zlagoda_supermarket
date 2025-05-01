@@ -5,29 +5,33 @@
     <h1 class="text-4xl font-bold mb-6 text-center">Працівники</h1>
 
     <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6">{% if employee %}Редагувати працівника{% else %}Додати нового працівника{% endif %}</h2>
+        <h2 class="text-2xl font-bold mb-6">{% if employee %}Редагувати працівника{% else %}Додати нового працівника{%
+            endif %}</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for category, message in messages %}
-                <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+        {% for category, message in messages %}
+        <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <form action="{% if employee %}{{ url_for('views.edit_employee', id=employee.id) }}{% else %}{{ url_for('views.add_employee') }}{% endif %}" method="POST" class="space-y-6">
+        <form action="{% if employee %}{{ url_for('views.edit_employee', id=employee.id) }}{% else %}{{ url_for('views.add_employee') }}{% endif %}"
+              method="POST" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
                     <label class="block mb-2 text-lg">ID</label>
-                    <input type="text" name="id" value="{% if employee %}{{ employee.id }}{% else %}{{ next_id }}{% endif %}" readonly
+                    <input type="text" name="id"
+                           value="{% if employee %}{{ employee.id }}{% else %}{{ next_id }}{% endif %}" readonly
                            class="w-full px-4 py-2 bg-gray-300 border border-gray-400 rounded-lg cursor-not-allowed">
                 </div>
 
                 <div class="md:col-span-2">
                     <label for="full_name" class="block mb-2 text-lg">ПІБ</label>
-                    <input type="text" id="full_name" name="full_name" value="{% if employee %}{{ employee.full_name }}{% endif %}" required
+                    <input type="text" id="full_name" name="full_name"
+                           value="{% if employee %}{{ employee.full_name }}{% endif %}" required
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
@@ -35,8 +39,10 @@
                     <label for="position" class="block mb-2 text-lg">Посада</label>
                     <select id="position" name="position" required
                             class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="Менеджер" {% if employee and employee.position == 'Менеджер' %}selected{% endif %}>Менеджер</option>
-                        <option value="Касир" {% if employee and employee.position == 'Касир' %}selected{% endif %}>Касир</option>
+                        <option value="Менеджер" {% if employee and employee.position==
+                        'Менеджер' %}selected{% endif %}>Менеджер</option>
+                        <option value="Касир" {% if employee and employee.position==
+                        'Касир' %}selected{% endif %}>Касир</option>
                     </select>
                 </div>
             </div>
@@ -68,9 +74,12 @@
                 <div>
                     <label for="phone" class="block mb-2 text-lg">Телефон</label>
                     <input type="tel" id="phone" name="phone"
-                           value="{% if employee %}{{ employee.phone }}{% endif %}" required
+                           value="{% if employee %}{{ employee.phone }}{% else %}+380{% endif %}" required
+                           pattern="\+380\d{9}" maxlength="13" minlength="13"
+                           title="Номер телефону має починатися з +380 та містити 9 цифр після коду"
                            class="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+
 
                 <div>
                     <label for="address" class="block mb-2 text-lg">Адреса</label>
