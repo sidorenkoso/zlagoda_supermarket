@@ -37,7 +37,7 @@ def employees():
         search_lower = search_query.lower()
         employees = [
             emp for emp in employees
-            if search_lower in emp.last_name.lower()
+            if emp.last_name and emp.last_name.lower().startswith(search_lower)
         ]
 
     return render_template("employees.html", user=current_user, employees=employees, current_filter=position_filter)
