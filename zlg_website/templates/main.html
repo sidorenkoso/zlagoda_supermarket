@@ -2,10 +2,11 @@
 {% block title %}Головна{% endblock %}
 
 {% block content %}
-<div class="text-center mt-20">
+<div class="text-center mt-10">
     <h1 class="text-5xl font-bold text-black">Головна сторінка</h1>
 
     {% if user.position == 'Менеджер' %}
+
     <!-- Статистика для менеджера -->
     <p class="text-xl mt-10">Статистика</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 max-w-4xl mx-auto">
@@ -17,6 +18,7 @@
             <div class="text-lg font-medium mb-2">Працівники</div>
             <div class="text-4xl font-bold">{{ employee_count }}</div>
         </a>
+        <!--
         <a href="/clients" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
             <div class="text-lg font-medium mb-2">Картки клієнтів</div>
             <div class="text-4xl font-bold">{{ client_count }}</div>
@@ -24,6 +26,51 @@
         <a href="/статистика" class="bg-blue-100 rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
             <div class="text-lg font-medium">Переглянути статистику продажу певного товару</div>
         </a>
+        -->
+    </div>
+     <!-- Аналітика певного товару -->
+    <div class="mt-16 max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6">Аналітика певного товару</h2>
+
+        <form action="/product-analytics" method="GET" class="flex flex-col md:flex-row gap-4 justify-center items-center mb-8">
+            <div class="w-full md:w-1/2 mt-8">
+                <label for="product" class="sr-only">Товар:</label>
+                <input type="text" id="product" name="product" placeholder="Введіть назву товару"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mr-4">
+                <p class="mb-1">
+                    <a  class="btn btn-outline-secondary">
+                    Період
+                </a>
+                </p>
+                <input
+                        type="date"
+                        name="date_from"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ request.args.get('date_from', '') }}"
+                />
+                <span class="mx-2">-</span>
+                <input
+                        type="date"
+                        name="date_to"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ request.args.get('date_to', '') }}"
+                />
+            </div>
+
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mt-6">
+                Знайти
+            </button>
+        </form>
+
+        {% if product_name %}
+        <div class="mt-4 bg-white shadow-md rounded-lg p-6 text-center">
+            <h3 class="text-2xl font-bold mb-3">{{ product_name }}</h3>
+            <p class="text-xl">Кількість продажу: <span class="font-bold text-blue-600">{{ sales_quantity }}</span></p>
+        </div>
+        {% endif %}
     </div>
 
      {% elif user.position == 'Касир' %}
@@ -38,12 +85,8 @@
         <p><strong>Email:</strong> {{ user.email }}</p>
         <p><strong>Посада:</strong> {{ user.position }}</p>
         <p><strong>Зарплата:</strong> {{ user.salary }}</p>
-
     </div>
     {% endif %}
 </div>
-
-<a href="/dashboard" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center text-lg font-bold shadow-lg hover:bg-red-600 transition">
-    Д
-</a>
 {% endblock %}
+
