@@ -30,8 +30,8 @@
             <div class="mr-4">
                 <p class="mb-1">
                     <a href="{{ url_for('views.receipts', sort=sort, order=order) }}" class="btn btn-outline-secondary">
-                    Період
-                </a>
+                        Період
+                    </a>
                 </p>
                 <input
                         type="date"
@@ -65,10 +65,11 @@
         {% if user.position == 'Менеджер' %}
         <div>
             <form id="printReportForm">
-    <button type="button" id="printButton" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
-        Надрукувати звіт
-    </button>
-</form>
+                <button type="button" id="printButton"
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                    Надрукувати звіт
+                </button>
+            </form>
 
         </div>
         {% endif %}
@@ -83,7 +84,8 @@
                     #
                 </th>
                 <th class="border border-gray-300 px-4 py-2 text-left">
-                    <a href="{{ url_for('views.receipts', sort='date', order='desc' if sort == 'date' and order == 'asc' else 'asc') }}" class="hover:underline">
+                    <a href="{{ url_for('views.receipts', sort='date', order='desc' if sort == 'date' and order == 'asc' else 'asc') }}"
+                       class="hover:underline">
                         Дата
                     </a>
                 </th>
@@ -114,7 +116,10 @@
                 </td>
                 <td class="border border-gray-300 px-4 py-2">
                     <div class="flex flex-col space-y-1">
-                        <a href="{{ url_for('views.view_receipt', receipt_number=receipt.receipt_number) }}"
+                        <a href="{{ url_for('views.view_receipt', receipt_number=receipt.receipt_number,
+                    employee_id=request.args.get('employee_id'),
+                    date_from=request.args.get('date_from'),
+                    date_to=request.args.get('date_to')) }}"
                            class="text-blue-600 hover:underline">Переглянути</a>
                         <form method="POST"
                               action="{{ url_for('views.delete_receipt', receipt_number=receipt.receipt_number) }}"
@@ -175,26 +180,26 @@
 <script src="{{ url_for('static', filename='index.js') }}"></script>
 
 <script>
-document.getElementById('printButton').addEventListener('click', function () {
-    const printWindow = window.open('', 'printWindow', 'width=800,height=600');
+    document.getElementById('printButton').addEventListener('click', function () {
+        const printWindow = window.open('', 'printWindow', 'width=800,height=600');
 
-    fetch("{{ url_for('views.print_receipts_report') }}")
-        .then(response => response.text())
-        .then(html => {
-            printWindow.document.open();
-            printWindow.document.write(html);
-            printWindow.document.close();
+        fetch("{{ url_for('views.print_receipts_report') }}")
+            .then(response => response.text())
+            .then(html => {
+                printWindow.document.open();
+                printWindow.document.write(html);
+                printWindow.document.close();
 
-            printWindow.onload = function () {
-                printWindow.focus();
-                printWindow.print();
-            };
-        })
-        .catch(error => {
-            console.error('Помилка під час отримання звіту:', error);
-            alert('Не вдалося завантажити звіт для друку.');
-        });
-});
+                printWindow.onload = function () {
+                    printWindow.focus();
+                    printWindow.print();
+                };
+            })
+            .catch(error => {
+                console.error('Помилка під час отримання звіту:', error);
+                alert('Не вдалося завантажити звіт для друку.');
+            });
+    });
 </script>
 
 

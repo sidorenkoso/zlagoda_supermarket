@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, abort, flash, jsonify
 from flask_login import login_required, current_user
-from zlg_website.models import Receipt, Employee, db, CustomerCard, Product, StoreProduct
+from zlg_website.models import Receipt, Employee, db, CustomerCard, Product, StoreProduct, ReceiptItem
 from datetime import datetime, timedelta
 from . import views
 import re
@@ -66,7 +66,7 @@ def view_receipt(receipt_number):
     # Отримуємо чек за його номером
     receipt = Receipt.query.get_or_404(receipt_number)
     return render_template('receipts_items.html', receipt=receipt,
-        user=current_user)
+                           user=current_user)
 
 
 @views.route('/delete_receipt/<receipt_number>', methods=['POST'])
@@ -83,41 +83,8 @@ def delete_receipt(receipt_number):
     db.session.commit()
 
     flash('Чек успішно видалено', 'success')
-    return redirect(url_for('views.receipts'),
-        user=current_user)
+    return redirect(url_for('views.receipts'))
 
-
-@views.route('/receipts/add', methods=['GET', 'POST'])
-@login_required
-def add_receipts():
-    if current_user.position != 'Касир':
-        abort(403)
-
-    new_receipt_number = generate_receipt_number()  # ← ТЕПЕР ЦЕ ЗА МЕЖАМИ if
-
-    if request.method == "POST":
-        try:
-            card_number = request.form.get('card_number') or None
-            print_date = datetime.now()
-
-            new_receipt = Receipt(
-                receipt_number=new_receipt_number,
-                employee_id=current_user.id,
-                card_number=card_number,
-                print_date=print_date
-            )
-
-            db.session.add(new_receipt)
-            db.session.commit()
-
-            flash("Чек успішно додано!", "success")
-            return redirect(url_for("views.receipts"))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Помилка при додаванні чеку: {str(e)}", "error")
-
-    return render_template("add_receipt.html", user=current_user, receipt_number=new_receipt_number)
 
 
 
@@ -157,3 +124,81 @@ def get_client_info():
     })
 
 
+@views.route('/search-product')
+@login_required
+def search_product():
+    query = request.args.get('query', '')
+    if query:
+        # Приклад: пошук продуктів у базі даних
+        products = Product.query.filter(Product.name.ilike(f'%{query}%')).all()
+
+        # Якщо є результати, повертаємо їх у вигляді JSON
+        return jsonify([{'name': product.name} for product in products])
+
+    return jsonify([])  # Повертаємо порожній список, якщо запит порожній
+
+
+@views.route('/api/product_info')
+@login_required
+def product_info():
+    name = request.args.get('name')
+    product = StoreProduct.query.join(Product).filter(Product.name == name).first()
+    if not product:
+        return jsonify(None)
+
+    return jsonify({
+        'upc': product.upc,
+        'name': product.product.name,
+        'price': product.calculate_promo_price
+    })
+
+
+@views.route('/receipts/add', methods=['GET', 'POST'])
+@login_required
+def add_receipts():
+    if current_user.position != 'Касир':
+        abort(403)
+
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            card_number = data.get('card_number')
+            items = data.get('items', [])
+
+            receipt_number = generate_receipt_number()
+            new_receipt = Receipt(
+                receipt_number=receipt_number,
+                employee_id=current_user.id,
+                customer_card_number=card_number or None,
+                date = datetime.now()
+            )
+
+            db.session.add(new_receipt)
+
+            for item in items:
+                upc = item['upc']
+                quantity = int(item['quantity'])
+                store_product = StoreProduct.query.get(upc)
+
+                if store_product.quantity < quantity:
+                    raise ValueError(f"Недостатньо товару для {store_product.product.name}")
+
+                # Створити позицію в чеку
+                receipt_item = ReceiptItem(
+                    receipt=new_receipt,
+                    upc=upc,
+                    quantity=quantity
+                )
+                db.session.add(receipt_item)
+
+                # Оновити кількість на складі
+                store_product.quantity -= quantity
+
+            db.session.commit()
+            return jsonify({'success': True, 'receipt_number': receipt_number})
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'message': str(e)}), 400
+
+    return render_template("add_receipt.html", user=current_user, receipt_number=generate_receipt_number())
