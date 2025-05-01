@@ -48,6 +48,12 @@
             </div>
         </div>
 
+        <div class="flex items-center mt-4">
+            <input type="checkbox" id="is_promotional" name="is_promotional"
+                class="mr-2 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="is_promotional" class="text-lg">Акційний товар</label>
+        </div>
+
         <div>
             <label for="expiration_date" class="block mb-2 text-lg">Дата придатності</label>
             <input type="date" id="expiration_date" name="expiration_date"
@@ -78,6 +84,7 @@
                 document.getElementById('price').value = data.price || '';
                 document.getElementById('expiration_date').value = data.expiration_date || '';
                 document.getElementById('quantity').value = '';
+                document.getElementById('is_promotional').checked = !!data.is_promotional;
             });
     });
 </script>

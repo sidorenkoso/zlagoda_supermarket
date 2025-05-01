@@ -130,9 +130,13 @@ def add_storeproduct():
             # Оновлення існуючого товару
             storeproduct.price = price
             storeproduct.promo_price = float(promo_price) if promo_price else None
-            storeproduct.is_promotional = is_promotional
             storeproduct.quantity += quantity
             storeproduct.expiration_date = expiration_date
+            if is_promotional:
+                storeproduct.promo_price = round(price * 0.8, 2)
+            else:
+                storeproduct.promo_price = None
+
             flash("Інформацію про товар оновлено успішно!", "success")
         else:
             if not upc or not product_id or not price or not quantity:
@@ -187,7 +191,8 @@ def fetch_storeproduct(product_id):
             "exists": True,
             "upc": storeproduct.upc,
             "price": float(storeproduct.price),
-            "expiration_date": storeproduct.expiration_date.isoformat() if storeproduct.expiration_date else ""
+            "expiration_date": storeproduct.expiration_date.isoformat() if storeproduct.expiration_date else "",
+            "is_promotional": storeproduct.is_promotional
         })
     else:
         # Якщо товару ще немає в наявності — згенеруємо UPC
