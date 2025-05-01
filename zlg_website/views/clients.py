@@ -40,7 +40,7 @@ def clients():
                     clients = []
             elif current_user.position == 'Касир':
                 lowered = search_query.lower()
-                clients = [c for c in clients if lowered in c.last_name.lower()]
+                clients = [c for c in clients if c.last_name and c.last_name.lower().startswith(lowered)]
 
     return render_template("clients.html", user=current_user, clients=clients,
                            current_city=city_filter, search_query=search_query)
