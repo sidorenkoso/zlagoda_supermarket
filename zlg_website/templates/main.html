@@ -8,25 +8,15 @@
     {% if user.position == 'Менеджер' %}
 
     <!-- Статистика для менеджера -->
-    <p class="text-xl mt-10">Статистика</p>
+    <p class="text-xl mt-10">Загальне</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 max-w-4xl mx-auto">
-        <a href="/products" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
-            <div class="text-lg font-medium mb-2">Кількість товару</div>
-            <div class="text-4xl font-bold">{{ product_count }}</div>
-        </a>
-        <a href="/employees" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
-            <div class="text-lg font-medium mb-2">Працівники</div>
+         <a href="/salesStatistics" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
+            <div class="text-lg font-medium mb-2">Статистика продажів</div>
+         </a>
+         <a class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
+            <div class="text-lg font-medium mb-2">Аналітика роботи працівників</div>
             <div class="text-4xl font-bold">{{ employee_count }}</div>
         </a>
-        <!--
-        <a href="/clients" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
-            <div class="text-lg font-medium mb-2">Картки клієнтів</div>
-            <div class="text-4xl font-bold">{{ client_count }}</div>
-        </a>
-        <a href="/статистика" class="bg-blue-100 rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
-            <div class="text-lg font-medium">Переглянути статистику продажу певного товару</div>
-        </a>
-        -->
     </div>
      <!-- Аналітика певного товару -->
     <div class="mt-16 max-w-4xl mx-auto">

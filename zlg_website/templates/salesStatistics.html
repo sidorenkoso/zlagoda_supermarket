@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-2xl text-center font-bold mt-10">Звіт продажів</h1>
+
+    <h2 class="text-xl mt-8">Середня сума покупок постійних клієнтів, які здійснили більше ніж одну покупку</h2>
+
+    {% if query_results %}
+        <div class="mt-4 ml-10 ">
+            {% for row in query_results %}
+                <p><strong>ПІБ:</strong> {{ row.full_name }}</p>
+                <p><strong>Номер картки:</strong> {{ row.card_number }}</p>
+                <p><strong>Кількість чеків:</strong> {{ row.receipt_count }}</p>
+                <p><strong>Середня сума:</strong> {{ row.average_purchase_sum }}</p>
+                <hr>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Немає даних для відображення.</p>
+    {% endif %}
+
+    <h1 class="text-2xl font-bold text-center mt-10">Непродані неакційні товари по категорії</h1>
+
+   <form method="GET" class="mb-4">
+    <label for="category" class="block mb-2">Оберіть категорію:</label>
+    <select name="category" id="category"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onchange="this.form.submit()">
+        <option value="">-- Виберіть категорію --</option>
+        {% for category in categories %}
+            <option value="{{ category.name }}"
+                {% if selected_category == category.name %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+    {% if products %}
+        <div class="mt-8">
+            <table class="table-auto w-full border mt-4">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="px-4 py-2">ID</th>
+                        <th class="px-4 py-2">Назва</th>
+                        <th class="px-4 py-2">Виробник</th>
+                        <th class="px-4 py-2">Категорія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in products %}
+                        <tr>
+                            <td class="border px-4 py-2">{{ row.id }}</td>
+                            <td class="border px-4 py-2">{{ row.name }}</td>
+                            <td class="border px-4 py-2">{{ row.manufacturer }}</td>
+                            <td class="border px-4 py-2">{{ row.category }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif selected_category %}
+        <p class="mt-6 text-center text-gray-600">Немає товарів для відображення у цій категорії.</p>
+    {% endif %}
+
+    <div class="mt-12 ">
+        <a href="{{ url_for('views.home') }}" class=" bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded ml-1000">
+            ← Повернутися назад
+        </a>
+    </div>
+</div>
+{% endblock %}
