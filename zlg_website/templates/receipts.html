@@ -4,7 +4,7 @@
 <div class="py-4">
     <h1 class="text-4xl font-bold mb-6 text-center">Чеки</h1>
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-7">
         <form method="get" action="{{ url_for('views.receipts') }}" class="flex items-center">
             <div class="mr-4">
                 <p class="mb-1">Касир</p>
@@ -55,7 +55,7 @@
             {% if user.position == 'Касир' %}
             <div>
                 <a href="{{ url_for('views.add_receipts') }}"
-                   class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                   class="mt-5 px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 ml-10 mb-5">
                     Додати
                 </a>
             </div>

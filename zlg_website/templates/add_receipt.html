@@ -37,9 +37,10 @@
                     <input type="text" id="product_search" class="w-80 px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <div id="searchResults" class="absolute left-0 right-0 bg-white shadow-lg rounded-md mt-1 max-h-60 overflow-y-auto hidden z-10"></div>
                 </div>
+
             </div>
-            <div class="flex items-center">
-                <span class="text-lg">/= вибрати зі списку товару</span>
+            <div class="flex items-center mt-8">
+                 <button id="add_button" class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Додати в чек</button>
             </div>
         </div>
 
@@ -85,6 +86,53 @@
 </div>
 
 <script>
+    document.getElementById("product_search").addEventListener("input", function () {
+    const query = this.value;
+
+    if (query.length < 2) {
+        document.getElementById("searchResults").classList.add("hidden");
+        return;
+    }
+
+    fetch(`/search-product?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById("searchResults");
+            resultsDiv.innerHTML = "";  // Очистити попередні результати
+
+            // Перевіримо, чи є дані в відповіді
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(product => {
+                    if (product.name) {  // Перевірка на наявність назви продукту
+                        const item = document.createElement("div");
+                        item.className = "p-2 hover:bg-gray-200 cursor-pointer";
+                        item.textContent = product.name;
+
+                        item.addEventListener("click", function () {
+                            document.getElementById("product_search").value = product.name;
+                            resultsDiv.classList.add("hidden");
+                        });
+
+                        resultsDiv.appendChild(item);
+                    }
+                });
+            } else {
+                resultsDiv.innerHTML = "<p class='p-2 text-gray-500'>Нічого не знайдено</p>";
+            }
+
+            // Показуємо список, якщо є результати
+            resultsDiv.classList.remove("hidden");
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error);
+            const resultsDiv = document.getElementById("searchResults");
+            resultsDiv.innerHTML = "<p class='p-2 text-gray-500'>Помилка при пошуку</p>";
+            resultsDiv.classList.remove("hidden");
+        });
+});
+
+
+
 
     document.getElementById('card_number').addEventListener('input', function () {
         const cardNumber = this.value.trim();
@@ -110,6 +158,121 @@
                 customerNameInput.value = '';
                 discountInput.value = '';
                 console.error(error);
+            });
+    });
+
+    const receiptItems = [];
+
+    document.getElementById("add_button").addEventListener("click", function (e) {
+        e.preventDefault();
+        const productName = document.getElementById("product_search").value;
+
+        if (!productName) return;
+
+        fetch(`/api/product_info?name=${encodeURIComponent(productName)}`)
+            .then(res => res.json())
+            .then(product => {
+                if (!product) return;
+
+                // Якщо товар вже в списку — не додаємо повторно
+                if (receiptItems.some(item => item.upc === product.upc)) return;
+
+                const newItem = {
+                    upc: product.upc,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                };
+                receiptItems.push(newItem);
+                updateTable();
+                updateTotals();
+                document.getElementById("product_search").value = "";
+            });
+    });
+
+    function updateTable() {
+        const tbody = document.getElementById("receipt_items");
+        tbody.innerHTML = "";
+
+        receiptItems.forEach((item, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="py-2 px-4 border">${index + 1}</td>
+                <td class="py-2 px-4 border">${item.name}</td>
+                <td class="py-2 px-4 border">${item.price.toFixed(2)}</td>
+                <td class="py-2 px-4 border">
+                    <input type="number" min="1" value="${item.quantity}" class="quantity-input w-16 px-2 py-1 border" data-upc="${item.upc}">
+                </td>
+                <td class="py-2 px-4 border" id="sum-${item.upc}">${(item.price * item.quantity).toFixed(2)}</td>
+                <td class="py-2 px-4 border text-center">
+                    <button class="remove-item text-red-500" data-upc="${item.upc}">✕</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        // Слухачі на зміну кількості
+        document.querySelectorAll(".quantity-input").forEach(input => {
+            input.addEventListener("input", (e) => {
+                const upc = e.target.dataset.upc;
+                const item = receiptItems.find(i => i.upc === upc);
+                const newQty = parseInt(e.target.value);
+                if (item && newQty > 0) {
+                    item.quantity = newQty;
+                    document.getElementById(`sum-${upc}`).textContent = (item.price * newQty).toFixed(2);
+                    updateTotals();
+                }
+            });
+        });
+
+        // Видалення товару
+        document.querySelectorAll(".remove-item").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const upc = e.target.dataset.upc;
+                const index = receiptItems.findIndex(i => i.upc === upc);
+                if (index > -1) {
+                    receiptItems.splice(index, 1);
+                    updateTable();
+                    updateTotals();
+                }
+            });
+        });
+    }
+
+    function updateTotals() {
+        const total = receiptItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
+        const discount = parseFloat(document.getElementById("discount_percent").value) || 0;
+        const discounted = total * (1 - discount / 100);
+
+        document.getElementById("total_sum").textContent = `${total.toFixed(2)} грн`;
+        document.getElementById("discounted_sum").textContent = `${discounted.toFixed(2)} грн`;
+    }
+
+    document.getElementById("save_button").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const cardNumber = document.getElementById("card_number").value || null;
+
+        fetch("/receipts/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                card_number: cardNumber,
+                items: receiptItems,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Чек збережено!");
+                    window.location.href = "/receipts";
+                } else {
+                    alert("Помилка: " + data.message);
+                }
             });
     });
 
