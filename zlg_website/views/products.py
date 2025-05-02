@@ -6,9 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from . import views
 from .. import db
-from ..models import Product
-
-
+from ..models import Product, Employee
 
 
 @views.route('/products')
@@ -208,3 +206,60 @@ def add_product():
 
 
    return render_template("form_products.html", user=current_user, categories=categories, next_id=next_id)
+
+
+@views.route('/product-analytics', methods=['GET'])
+@login_required
+def product_analytics():
+    product_name = request.args.get('product', '')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+
+    product_found = None
+    sales_quantity = 0
+
+    if product_name:
+        product_found, sales_quantity = get_product_sales_quantity(product_name, date_from, date_to)
+
+    # Get employee count for the dashboard
+    employee_count = len(Employee.get_all())
+
+    return render_template('main.html',
+                           user=current_user,
+                           employee_count=employee_count,
+                           product_name=product_found,
+                           sales_quantity=sales_quantity)
+
+
+
+def get_product_sales_quantity(product_name, date_from=None, date_to=None):
+    query = """
+        SELECT p.name AS product_name, SUM(ri.quantity) AS total_quantity
+        FROM receipt_item ri
+        JOIN store_product sp ON ri.upc = sp.upc
+        JOIN product p ON sp.product_id = p.id
+        JOIN receipt r ON ri.receipt_number = r.receipt_number
+        WHERE p.name LIKE :product_name
+    """
+
+    # Add date filters if provided
+    params = {"product_name": f"%{product_name}%"}
+
+    if date_from:
+        query += " AND r.date >= :date_from"
+        params["date_from"] = date_from
+
+    if date_to:
+        query += " AND r.date <= :date_to"
+        params["date_to"] = date_to
+
+    query += " GROUP BY p.name"
+
+    try:
+        result = db.session.execute(text(query), params).fetchone()
+        if result:
+            return result.product_name, int(result.total_quantity)
+        return None, 0
+    except Exception as e:
+        print(f"Error querying product sales: {e}")
+        return None, 0
