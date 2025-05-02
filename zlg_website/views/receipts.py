@@ -1,53 +1,72 @@
 from flask import Blueprint, render_template, redirect, url_for, request, abort, flash, jsonify
 from flask_login import login_required, current_user
-from zlg_website.models import Receipt, Employee, db, CustomerCard, Product, StoreProduct, ReceiptItem
+from zlg_website import db
 from datetime import datetime, timedelta
+from sqlalchemy import text
 from . import views
 import re
+from flask_login import UserMixin
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+from sqlalchemy.sql import text
+from ..models import Receipt
 
 
+# Ваша функція для отримання чеків
 @views.route('/receipts')
 @login_required
 def receipts():
-    # Отримуємо параметри фільтрації
     employee_id = request.args.get('employee_id', type=int)
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     sort = request.args.get('sort', 'date')
     order = request.args.get('order', 'desc')
 
-    # Базовий запит
-    query = Receipt.query
+    filters = []
+    params = {}
+
     if current_user.position == 'Касир':
-        query = query.filter(Receipt.employee_id == current_user.id)
+        filters.append("r.employee_id = :user_id")
+        params['user_id'] = current_user.id
     elif employee_id:
-        query = query.filter(Receipt.employee_id == employee_id)
+        filters.append("r.employee_id = :employee_id")
+        params['employee_id'] = employee_id
 
     if date_from:
-        date_from = datetime.strptime(date_from, '%Y-%m-%d')
-        query = query.filter(Receipt.date >= date_from)
+        filters.append("r.date >= :date_from")
+        params['date_from'] = date_from
 
     if date_to:
-        date_to = datetime.strptime(date_to, '%Y-%m-%d')
-        # Додаємо один день, щоб включити весь вибраний день
-        date_to = date_to + timedelta(days=1)
-        query = query.filter(Receipt.date < date_to)
+        date_to_dt = datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)
+        filters.append("r.date < :date_to")
+        params['date_to'] = date_to_dt.strftime('%Y-%m-%d')
 
-    # Застосовуємо сортування
-    if sort == 'date':
-        if order == 'asc':
-            query = query.order_by(Receipt.date.asc())
-        else:
-            query = query.order_by(Receipt.date.desc())
+    where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
 
-    # Виконуємо запит
-    receipts = query.all()
+    query_str = f"""
+        SELECT r.receipt_number, r.date, e.first_name AS employee_first_name, e.last_name AS employee_last_name
+        FROM Receipt r
+        JOIN Employee e ON r.employee_id = e.id
+        {where_clause}
+        ORDER BY r.date {'ASC' if order == 'asc' else 'DESC'}
+    """
 
-    # Розраховуємо загальну суму всіх відфільтрованих чеків
-    total_sum = sum(receipt.total_sum for receipt in receipts)
+    # Отримуємо всі чеки
+    receipts = Receipt.get_all()
 
-    # Отримуємо всіх працівників для випадаючого списку
-    employees = Employee.query.all()
+    # Для кожного чеку обчислюємо total_sum і vat
+    for receipt in receipts:
+        receipt.total_sum = receipt.get_total_sum()
+        receipt.vat = receipt.get_vat()
+
+        # Переконатися, що `receipt.date` є об'єктом datetime
+        if isinstance(receipt.date, str):
+            receipt.date = datetime.strptime(receipt.date, '%Y-%m-%d')
+
+    # Загальна сума всіх чеків
+    total_sum = sum(r.total_sum for r in receipts)
+
+    employees = db.session.execute(text("SELECT * FROM Employee")).mappings().all()
 
     return render_template(
         'receipts.html',
@@ -60,98 +79,91 @@ def receipts():
     )
 
 
+
 @views.route('/view_receipt/<receipt_number>')
 @login_required
 def view_receipt(receipt_number):
-    # Отримуємо чек за його номером
-    receipt = Receipt.query.get_or_404(receipt_number)
-    return render_template('receipts_items.html', receipt=receipt,
-                           user=current_user)
-
+    query = text("""
+        SELECT * FROM Receipt WHERE receipt_number = :receipt_number
+    """)
+    result = db.session.execute(query, {'receipt_number': receipt_number}).mappings().first()
+    if not result:
+        abort(404)
+    return render_template('receipts_items.html', receipt=result, user=current_user)
 
 @views.route('/delete_receipt/<receipt_number>', methods=['POST'])
 @login_required
 def delete_receipt(receipt_number):
-    receipt = Receipt.query.get_or_404(receipt_number)
+    try:
+        db.session.execute(text("DELETE FROM ReceiptItem WHERE receipt_number = :receipt_number"),
+                           {'receipt_number': receipt_number})
+        db.session.execute(text("DELETE FROM Receipt WHERE receipt_number = :receipt_number"),
+                           {'receipt_number': receipt_number})
+        db.session.commit()
+        flash('Чек успішно видалено', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Помилка при видаленні чеку: {str(e)}', 'danger')
 
-    # Видаляємо всі пов'язані позиції чеку спочатку
-    for item in receipt.items:
-        db.session.delete(item)
-
-    # Потім видаляємо сам чек
-    db.session.delete(receipt)
-    db.session.commit()
-
-    flash('Чек успішно видалено', 'success')
     return redirect(url_for('views.receipts'))
 
-
-
-
 def generate_receipt_number():
-    # Отримуємо останній чек за номером (за спаданням)
-    last_receipt = Receipt.query.order_by(Receipt.receipt_number.desc()).first()
-
-    if last_receipt:
-        # Витягуємо числову частину з формату R8613
-        match = re.search(r'R(\d+)', last_receipt.receipt_number)
-        if match:
-            number = int(match.group(1)) + 1
-        else:
-            number = 1
+    query = text("""
+        SELECT receipt_number FROM Receipt
+        ORDER BY CAST(SUBSTR(receipt_number, 2) AS INTEGER) DESC
+        LIMIT 1
+    """)
+    result = db.session.execute(query).scalar()
+    if result and re.match(r'R\d+', result):
+        next_num = int(result[1:]) + 1
     else:
-        number = 1
-
-    # Формуємо новий номер чеку: R8614
-    return f'R{number}'
-
+        next_num = 1
+    return f'R{next_num}'
 
 @views.route('/api/client_info')
 @login_required
 def get_client_info():
     card_number = request.args.get('card_number')
-
     if not card_number:
         return jsonify({'error': 'Номер картки не вказано'}), 400
 
-    client = CustomerCard.query.filter_by(card_number=card_number).first()
+    client = db.session.execute(text("""
+        SELECT * FROM CustomerCard WHERE card_number = :card_number
+    """), {'card_number': card_number}).mappings().first()
+
     if not client:
         return jsonify({'error': 'Клієнта не знайдено'}), 404
 
-    return jsonify({
-        'full_name': f"{client.last_name} {client.first_name} {client.middle_name or ''}".strip(),
-        'discount_percent': client.discount_percent
-    })
-
+    full_name = f"{client['last_name']} {client['first_name']} {client['middle_name'] or ''}".strip()
+    return jsonify({'full_name': full_name, 'discount_percent': client['discount_percent']})
 
 @views.route('/search-product')
 @login_required
 def search_product():
     query = request.args.get('query', '')
     if query:
-        # Приклад: пошук продуктів у базі даних
-        products = Product.query.filter(Product.name.ilike(f'%{query}%')).all()
-
-        # Якщо є результати, повертаємо їх у вигляді JSON
-        return jsonify([{'name': product.name} for product in products])
-
-    return jsonify([])  # Повертаємо порожній список, якщо запит порожній
-
+        results = db.session.execute(text("""
+            SELECT name FROM Product WHERE name ILIKE :query
+        """), {'query': f'%{query}%'}).scalars().all()
+        return jsonify([{'name': name} for name in results])
+    return jsonify([])
 
 @views.route('/api/product_info')
 @login_required
 def product_info():
     name = request.args.get('name')
-    product = StoreProduct.query.join(Product).filter(Product.name == name).first()
+    product = db.session.execute(text("""
+        SELECT sp.upc, p.name, sp.selling_price, sp.promotional_product, sp.promo_price
+        FROM StoreProduct sp
+        JOIN Product p ON sp.id_product = p.id_product
+        WHERE p.name = :name
+    """), {'name': name}).mappings().first()
+
     if not product:
         return jsonify(None)
 
-    return jsonify({
-        'upc': product.upc,
-        'name': product.product.name,
-        'price': product.calculate_promo_price
-    })
-
+    price = product['promo_price'] if product['promotional_product'] else product['selling_price']
+    return jsonify({'upc': product['upc'], 'name': product['name'], 'price': price})
 
 @views.route('/receipts/add', methods=['GET', 'POST'])
 @login_required
@@ -166,33 +178,41 @@ def add_receipts():
             items = data.get('items', [])
 
             receipt_number = generate_receipt_number()
-            new_receipt = Receipt(
-                receipt_number=receipt_number,
-                employee_id=current_user.id,
-                customer_card_number=card_number or None,
-                date = datetime.now()
-            )
+            now = datetime.now()
 
-            db.session.add(new_receipt)
+            db.session.execute(text("""
+                INSERT INTO Receipt (receipt_number, employee_id, customer_card_number, date)
+                VALUES (:receipt_number, :employee_id, :card_number, :date)
+            """), {
+                'receipt_number': receipt_number,
+                'employee_id': current_user.id,
+                'card_number': card_number or None,
+                'date': now
+            })
 
             for item in items:
                 upc = item['upc']
                 quantity = int(item['quantity'])
-                store_product = StoreProduct.query.get(upc)
 
-                if store_product.quantity < quantity:
-                    raise ValueError(f"Недостатньо товару для {store_product.product.name}")
+                stock = db.session.execute(text("""
+                    SELECT quantity FROM StoreProduct WHERE upc = :upc
+                """), {'upc': upc}).scalar()
 
-                # Створити позицію в чеку
-                receipt_item = ReceiptItem(
-                    receipt=new_receipt,
-                    upc=upc,
-                    quantity=quantity
-                )
-                db.session.add(receipt_item)
+                if stock is None or stock < quantity:
+                    raise ValueError(f"Недостатньо товару для UPC: {upc}")
 
-                # Оновити кількість на складі
-                store_product.quantity -= quantity
+                db.session.execute(text("""
+                    INSERT INTO ReceiptItem (receipt_number, upc, quantity)
+                    VALUES (:receipt_number, :upc, :quantity)
+                """), {
+                    'receipt_number': receipt_number,
+                    'upc': upc,
+                    'quantity': quantity
+                })
+
+                db.session.execute(text("""
+                    UPDATE StoreProduct SET quantity = quantity - :qty WHERE upc = :upc
+                """), {'qty': quantity, 'upc': upc})
 
             db.session.commit()
             return jsonify({'success': True, 'receipt_number': receipt_number})

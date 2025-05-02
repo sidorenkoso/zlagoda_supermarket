@@ -116,7 +116,7 @@
             {% for product in products %}
             <tr>
                 <td class="border border-gray-300 px-4 py-2">{{ product.upc }}</td>  <!-- UPC товару -->
-                <td class="border border-gray-300 px-4 py-2">{{ product.product.name }}</td>  <!-- Назва товару -->
+                <td class="border border-gray-300 px-4 py-2">{{ product.name }}</td>  <!-- Назва товару -->
                 <td class="border border-gray-300 px-4 py-2">
     {{ product.promo_price if product.is_promotional and product.promo_price else product.price }}
 </td>
