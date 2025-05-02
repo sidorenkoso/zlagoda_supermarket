@@ -37,11 +37,11 @@
             {% for product in products %}
             <tr>
                 <td class="border border-gray-300 px-4 py-2">{{ product.upc }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ product.product.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.product_name }}</td>
                 <td class="border border-gray-300 px-4 py-2">
                     {{ product.promo_price if product.is_promotional and product.promo_price else product.price }} грн
                 </td>
-                <td class="border border-gray-300 px-4 py-2">{{ product.product.category.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ product.category_name }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ product.quantity }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ 'Так' if product.is_promotional else 'Ні' }}</td>
             </tr>
@@ -55,10 +55,6 @@
         </table>
     </div>
 </div>
-
-<script>
-    // Якщо потрібно додати якусь функціональність для друку чи інших дій, додайте тут
-</script>
 
 {% endblock %}
 

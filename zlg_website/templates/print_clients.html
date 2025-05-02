@@ -22,7 +22,7 @@
                     <a href="{{ url_for('views.clients', search=request.args.get('search'), sort='last_name', order='asc' if request.args.get('order') == 'desc' else 'desc') }}"
                        class="hover:underline">
                         ПІБ {% if request.args.get('sort') == 'last_name' %}
-                        {% if request.args.get('order') == 'asc' %}▲{% else %}▼{% endif %}
+                        {% if request.args.get('order') == 'asc' %}{% else %}{% endif %}
                         {% endif %}
                     </a>
                 </th>

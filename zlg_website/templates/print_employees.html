@@ -1,49 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <title>Звіт по працівниках</title>
+    <style>
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .print-container {
+                width: 100%;
+                margin: 0;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-white text-black">
-    {% block content %}
-        <div class="print-container">
-            <h1 class="text-2xl font-bold text-center mb-4">Звіт по працівниках</h1>
+    <div class="print-container">
+        <h1 class="text-2xl font-bold text-center mb-4">Звіт по працівниках</h1>
 
-            <!-- Таблиця звіту -->
-            <table class="min-w-full border-collapse border border-gray-300 mt-4">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 px-4 py-2 text-left">#</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">ПІБ</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">Посада</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">ЗП</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">Дата Початку</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">Дата народження</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">Телефон</th>
-                        <th class="border border-gray-300 px-4 py-2 text-left">Адреса</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if employees %}
-                        {% for employee in employees %}
-                            <tr>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.full_name }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.position }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.salary }} грн</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.start_date }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.birth_date }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.phone }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ employee.address }}</td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
+        <!-- Таблиця звіту -->
+        <table class="min-w-full border-collapse border border-gray-300 mt-4">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-4 py-2 text-left">#</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">ПІБ</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Посада</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">ЗП</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Дата Початку</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Дата народження</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Телефон</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Адреса</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if employees %}
+                    {% for employee in employees %}
                         <tr>
-                            <td colspan="8" class="border border-gray-300 px-4 py-2 text-center">Немає працівників для друку</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.full_name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.position }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.salary }} грн</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.start_date if employee.start_date else '' }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.birth_date if employee.birth_date else '' }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.phone }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ employee.address }}</td>
                         </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="border border-gray-300 px-4 py-2 text-center">Немає працівників для друку</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <div class="mt-8 text-right">
+            <p>Дата: {{ now }}</p>
+            <p class="mt-4">Підпис: __________________</p>
         </div>
-    {% endblock %}
+    </div>
 </body>
+</html>

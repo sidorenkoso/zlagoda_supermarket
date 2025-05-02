@@ -4,6 +4,12 @@ from zlg_website import db
 from . import views
 from datetime import datetime
 from sqlalchemy import text
+from ..models import Employee, StoreProduct, CustomerCard
+from flask import Blueprint, render_template, request, abort, redirect, url_for, flash
+from flask_login import login_required, current_user
+from sqlalchemy import text
+from . import views
+from .. import db
 
 
 @views.route('/categories/report')
@@ -14,7 +20,7 @@ def print_categories_report():
 
     # Використовуємо чистий SQL запит для отримання всіх категорій
     sql_query = text("""
-        SELECT id, name, description 
+        SELECT category_number, name 
         FROM Category
         ORDER BY name
     """)
@@ -30,7 +36,7 @@ def print_receipts_report():
     if current_user.position != 'Менеджер':
         abort(403)
 
-    # Get the same filters as in the receipts view
+    # Отримуємо фільтри, якщо вони є
     employee_id = request.args.get('employee_id', type=int)
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
@@ -62,14 +68,20 @@ def print_receipts_report():
 
     base_query += " ORDER BY r.date DESC"
 
+    # Виконуємо чистий SQL запит для отримання чеків і отримуємо результат як мапінг
     receipts_data = db.session.execute(text(base_query), params).mappings().all()
 
-    # Обробка даних чеків
     receipts = []
     total_sum = 0
 
-    for r in receipts_data:
-        items_query = text("""
+    for row in receipts_data:
+        receipt_number = row['receipt_number']
+        receipt_date = row['date']
+        employee_first_name = row['first_name']
+        employee_last_name = row['last_name']
+
+        # Отримуємо деталі чека
+        items_query = """
             SELECT ri.upc, ri.quantity, 
                    CASE 
                        WHEN sp.is_promotional = TRUE THEN sp.promo_price 
@@ -78,9 +90,9 @@ def print_receipts_report():
             FROM ReceiptItem ri
             JOIN StoreProduct sp ON ri.upc = sp.upc
             WHERE ri.receipt_number = :receipt_number
-        """)
+        """
 
-        items = db.session.execute(items_query, {'receipt_number': r['receipt_number']}).mappings().all()
+        items = db.session.execute(text(items_query), {'receipt_number': receipt_number}).mappings().all()
 
         receipt_total = sum(item['price'] * item['quantity'] for item in items)
         vat = receipt_total * 0.2
@@ -88,13 +100,13 @@ def print_receipts_report():
         total_sum += receipt_total
 
         receipt = {
-            'receipt_number': r['receipt_number'],
-            'date': r['date'],
+            'receipt_number': receipt_number,
+            'date': receipt_date,
             'total_sum': receipt_total,
             'vat': vat,
             'employee': {
-                'first_name': r['first_name'],
-                'last_name': r['last_name']
+                'first_name': employee_first_name,
+                'last_name': employee_last_name
             }
         }
 
@@ -116,18 +128,33 @@ def print_employees_report():
     if current_user.position != 'Менеджер':
         abort(403)
 
-    # Використовуємо чистий SQL запит для отримання всіх робітників
+    # Оновлений SQL-запит для отримання всіх необхідних полів
     sql_query = text("""
-        SELECT id, first_name, last_name, position, salary, birth_date, 
-               start_date, phone, address
+        SELECT id, first_name, last_name, middle_name, position, salary, birth_date, 
+               start_date, phone, city, street, postal_code, email
         FROM Employee
         ORDER BY last_name, first_name
     """)
 
+    # Виконання запиту
+    result = db.session.execute(sql_query).mappings().all()
 
+    # Формуємо список працівників із додатковими полями full_name та address
+    employees = []
+    for row in result:
+        employee = dict(row)  # Перетворюємо RowMapping в звичайний словник
+        # Формуємо full_name
+        employee['full_name'] = f"{employee['first_name']} {employee['middle_name']} {employee['last_name']}"
 
-    employees = db.session.execute(sql_query).mappings().all()
-    return render_template('print_employees.html', employees=employees, user=current_user)
+        # Формуємо address
+        employee['address'] = f"{employee['city']}, {employee['street']}, {employee['postal_code']}"
+
+        employees.append(employee)
+
+    current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+
+    # Передаємо сформовані дані в шаблон
+    return render_template('print_employees.html', employees=employees, user=current_user, now=current_time)
 
 
 @views.route('/products/report')
@@ -138,10 +165,8 @@ def print_products_report():
 
     # Використовуємо чистий SQL запит для отримання всіх продуктів з інформацією про категорії
     sql_query = text("""
-        SELECT p.id, p.name, p.characteristics, c.name as category_name
+        SELECT p.id, p.name, p.manufacturer, p.specifications
         FROM Product p
-        LEFT JOIN Category c ON p.category_id = c.id
-        ORDER BY p.name
     """)
 
     products = db.session.execute(sql_query).mappings().all()
@@ -156,10 +181,11 @@ def print_storeproducts_report():
 
     # Використовуємо чистий SQL запит для отримання всіх товарів у магазині
     sql_query = text("""
-        SELECT sp.upc, p.name, sp.price, sp.quantity, sp.is_promotional, 
-               sp.promo_price, sp.promotional_start_date, sp.promotional_end_date
+        SELECT sp.upc, p.name AS product_name, sp.price, sp.quantity, sp.is_promotional, 
+               sp.promo_price, c.name AS category_name
         FROM StoreProduct sp
         JOIN Product p ON sp.product_id = p.id
+        JOIN Category c ON p.category_number = c.category_number
         ORDER BY p.name
     """)
 
@@ -175,10 +201,10 @@ def print_clients_report():
 
     # Використовуємо чистий SQL запит для отримання всіх клієнтів
     sql_query = text("""
-        SELECT card_number, cust_surname, cust_name, cust_patronymic, 
-               phone_number, city, street, zip_code, percent
-        FROM CustomerCard
-        ORDER BY cust_surname, cust_name
+        SELECT c.card_number, c.last_name, c.first_name, c.middle_name, 
+               c.phone, c.city, c.street, c.postal_code, c.discount_percent
+        FROM CustomerCard c
+        ORDER BY last_name, first_name
     """)
 
     clients = db.session.execute(sql_query).mappings().all()

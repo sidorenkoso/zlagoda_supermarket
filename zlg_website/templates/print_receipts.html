@@ -26,7 +26,7 @@
                         {% for receipt in receipts %}
                             <tr>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.receipt_number }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ receipt.date.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ receipt.date}}</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</td>
