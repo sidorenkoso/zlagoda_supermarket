@@ -26,8 +26,8 @@
                         {% endif %}
                     </a>
                 </th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Ціна</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Категорія</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Виробник</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Характеристика</th>
             </tr>
             </thead>
             <tbody>
@@ -38,6 +38,7 @@
                 <td class="border border-gray-300 px-4 py-2">{{ product.name }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ product.manufacturer }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ product.specifications }}</td>
+
             </tr>
             {% endfor %}
             {% else %}

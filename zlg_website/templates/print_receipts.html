@@ -27,8 +27,8 @@
                             <tr>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.receipt_number }}</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.date}}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ receipt.total_sum }} грн</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ receipt.vat }} грн</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ "%.2f"|format(receipt.total_sum) }} грн</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ "%.2f"|format(receipt.vat) }} грн</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ receipt.employee.last_name }} {{ receipt.employee.first_name }}</td>
                             </tr>
                         {% endfor %}
