@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-6 space-y-8">
+  <h1 class="text-2xl font-bold">Список касирів, які оформили понад 3 чеків, з підрахунком кількості чеків і середньою сумою чеку:</h1>
+  <table class="min-w-full border-collapse border">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="border px-4 py-2 text-left">Касир</th>
+        <th class="border px-4 py-2 text-right">Кількість чеків</th>
+        <th class="border px-4 py-2 text-right">Середня сума чеку</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats %}
+      <tr class="hover:bg-gray-50">
+        <td class="border px-4 py-2">{{ row.cashier_name }}</td>
+        <td class="border px-4 py-2 text-right">{{ row.receipt_count }}</td>
+        <td class="border px-4 py-2 text-right">{{ row.average_receipt_sum }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="border px-4 py-2 text-center">Немає даних</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="space-y-4">
+    <h1 class="text-2xl font-bold">Список касирів, які ніколи не продавали товари певної категорії:</h1>
+
+    <form method="GET" action="{{ url_for('views.cashiers_sql') }}" class="flex items-center space-x-2">
+      <label class="whitespace-nowrap">Категорія:</label>
+      <select name="category_id"
+              class="px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">— оберіть категорію —</option>
+        {% for cat in categories %}
+          <option value="{{ cat.category_number }}"
+            {% if category_id == cat.category_number %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit"
+              class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Пошук
+      </button>
+    </form>
+
+    {% if category_id is not none %}
+    <table class="min-w-full border-collapse border">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border px-4 py-2 text-left">ID касира</th>
+          <th class="border px-4 py-2 text-left">Касир</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in product_results %}
+        <tr class="hover:bg-gray-50">
+          <td class="border px-4 py-2">{{ row.id }}</td>
+          <td class="border px-4 py-2">{{ row.cashier_name }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="2" class="border px-4 py-2 text-center">Немає даних</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+  </div>
+    <div class="mt-12 ">
+        <a href="{{ url_for('views.home') }}" class=" bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded ml-1000">
+            ← Повернутися назад
+        </a>
+    </div>
+</div>
+{% endblock %}

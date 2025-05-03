@@ -13,34 +13,39 @@
             <div>
                 <label class="block mb-2">Введіть картку клієнта:</label>
                 <input type="text" name="card_number" id="card_number"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
                 <label class="block mb-2">Клієнт:</label>
                 <input type="text" id="customer_name" name="customer_name"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    readonly>
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       readonly>
             </div>
             <div>
                 <label class="block mb-2">% знижки:</label>
                 <input type="text" id="discount_percent" name="discount_percent"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    readonly>
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       readonly>
             </div>
         </div>
 
         <!-- Пошук товарів -->
-            <div class="flex items-center mb-6">
+        <div class="flex items-center mb-6">
             <div class="mr-4">
                 <label class="block mb-2">Знайти товар:</label>
                 <div class="relative">
-                    <input type="text" id="product_search" class="w-80 px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div id="searchResults" class="absolute left-0 right-0 bg-white shadow-lg rounded-md mt-1 max-h-60 overflow-y-auto hidden z-10"></div>
+                    <input type="text" id="product_search"
+                           class="w-80 px-4 py-2 border border-gray-300 rounded-lg bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="searchResults"
+                         class="absolute left-0 right-0 bg-white shadow-lg rounded-md mt-1 max-h-60 overflow-y-auto hidden z-10"></div>
                 </div>
 
             </div>
             <div class="flex items-center mt-8">
-                 <button id="add_button" class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Додати в чек</button>
+                <button id="add_button"
+                        class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Додати
+                    в чек
+                </button>
             </div>
         </div>
 
@@ -48,17 +53,17 @@
         <div class="overflow-x-auto mb-6">
             <table class="w-full border-collapse">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="py-2 px-4 text-left border">#</th>
-                        <th class="py-2 px-4 text-left border">Назва товару</th>
-                        <th class="py-2 px-4 text-left border">Ціна (грн)</th>
-                        <th class="py-2 px-4 text-left border">Кількість</th>
-                        <th class="py-2 px-4 text-left border">Сума (грн)</th>
-                        <th class="py-2 px-4 text-left border"></th>
-                    </tr>
+                <tr class="bg-gray-100">
+                    <th class="py-2 px-4 text-left border">#</th>
+                    <th class="py-2 px-4 text-left border">Назва товару</th>
+                    <th class="py-2 px-4 text-left border">Ціна (грн)</th>
+                    <th class="py-2 px-4 text-left border">Кількість</th>
+                    <th class="py-2 px-4 text-left border">Сума (грн)</th>
+                    <th class="py-2 px-4 text-left border"></th>
+                </tr>
                 </thead>
                 <tbody id="receipt_items">
-                    <!-- Рядки будуть додаватися динамічно -->
+                <!-- Рядки будуть додаватися динамічно -->
                 </tbody>
             </table>
         </div>
@@ -79,8 +84,12 @@
 
         <!-- Кнопки дій -->
         <div class="flex justify-center space-x-4">
-            <button id="save_button" class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Зберегти</button>
-            <button id="cancel_button" class="px-8 py-3 bg-gray-400 text-white rounded-md hover:bg-gray-500 focus:outline-none">Скасувати</button>
+            <button id="save_button"
+                    class="px-8 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none">Зберегти
+            </button>
+            <button id="cancel_button"
+                    class="px-8 py-3 bg-gray-400 text-white rounded-md hover:bg-gray-500 focus:outline-none">Скасувати
+            </button>
         </div>
     </form>
 </div>
@@ -108,7 +117,8 @@
                     <div class="flex items-center">
                         <button class="decrease-btn px-2 bg-gray-200 rounded" data-index="${index}" ${isDisabled}>-</button>
                         <span class="mx-2">${item.quantity}</span>
-                        <button class="increase-btn px-2 bg-gray-200 rounded" data-index="${index}">+</button>
+                        <button class="increase-btn px-2 bg-gray-200 rounded" data-index="${index}" data-max="${item.quantity}">+</button>
+
                     </div>
                 </td>
                 <td class="py-2 px-4 border">${total.toFixed(2)}</td>
@@ -122,7 +132,7 @@
 
         // Додаємо обробники подій для кнопок
         document.querySelectorAll('.decrease-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const index = parseInt(this.getAttribute('data-index'));
                 if (receiptItems[index].quantity > 1) {
                     receiptItems[index].quantity -= 1;
@@ -133,7 +143,7 @@
         });
 
         document.querySelectorAll('.increase-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const index = parseInt(this.getAttribute('data-index'));
                 receiptItems[index].quantity += 1;
                 updateTable();
@@ -142,7 +152,7 @@
         });
 
         document.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const index = parseInt(this.getAttribute('data-index'));
                 receiptItems.splice(index, 1);
                 updateTable();
@@ -243,7 +253,7 @@
     });
 
     // Закриття випадаючого списку при кліку поза ним
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         const searchInput = document.getElementById('product_search');
         const searchResults = document.getElementById('searchResults');
 

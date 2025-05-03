@@ -8,10 +8,15 @@
     {% if user.position == 'Менеджер' %}
 
     <!-- Статистика для менеджера -->
-    <p class="text-xl mt-10">Загальне</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 max-w-4xl mx-auto">
          <a href="/salesStatistics" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
             <div class="text-lg font-medium mb-2">Статистика продажів</div>
+         </a>
+        <a href="/cashierssql" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
+            <div class="text-lg font-medium mb-2">Касири запити</div>
+         </a>
+        <a href="/clientssql" class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
+            <div class="text-lg font-medium mb-2">Клієнти запити</div>
          </a>
          <a class="bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 hover:shadow-lg transition transform text-gray-800">
             <div class="text-lg font-medium mb-2">Аналітика роботи працівників</div>

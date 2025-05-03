@@ -13,31 +13,35 @@ from ..models import Receipt
 @views.route('/receipts')
 @login_required
 def receipts():
-    # Get actual table names from the database
-    receipt_table = 'receipt'
-    employee_table = 'employee'
-    receiptitem_table = 'receipt_item'
-    storeproduct_table = 'store_product'
-
+    # Існуючі параметри
     employee_id = request.args.get('employee_id', type=int)
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     sort = request.args.get('sort', 'date')
     order = request.args.get('order', 'desc')
 
-    # Build the base query with SQL
-    query_parts = [
-        f"SELECT r.receipt_number, r.date, r.customer_card_number, e.first_name, e.last_name, e.id as employee_id"
-    ]
+    # Новий параметр пошуку за номером чеку
+    search_query = request.args.get('search', '').strip()
 
-    # Add FROM and JOINs
+    # Імена таблиць
+    receipt_table = 'receipt'
+    employee_table = 'employee'
+    receiptitem_table = 'receipt_item'
+    storeproduct_table = 'store_product'
+
+    # Базовий SELECT ... FROM ... JOIN
+    query_parts = [
+        "SELECT r.receipt_number, r.date, r.customer_card_number, "
+        "e.first_name, e.last_name, e.id as employee_id"
+    ]
     query_parts.append(f"FROM {receipt_table} r")
     query_parts.append(f"JOIN {employee_table} e ON r.employee_id = e.id")
 
-    # Build WHERE clause
+    # WHERE
     where_conditions = []
     params = {}
 
+    # Фільтр по ролі / виборі касира
     if current_user.position == 'Касир':
         where_conditions.append("r.employee_id = :user_id")
         params['user_id'] = current_user.id
@@ -45,72 +49,60 @@ def receipts():
         where_conditions.append("r.employee_id = :employee_id")
         params['employee_id'] = employee_id
 
+    # Фільтр по датах
     if date_from:
         where_conditions.append("DATE(r.date) >= DATE(:date_from)")
         params['date_from'] = date_from
-
     if date_to:
-        # Add a day to include the entire end date
         where_conditions.append("DATE(r.date) <= DATE(:date_to)")
         params['date_to'] = date_to
+
+    # **Новий фільтр по номеру чеку**
+    if search_query:
+        where_conditions.append("r.receipt_number LIKE :search_query")
+        # startswith — будуємо шаблон "R8374%" (можна й рівність, якщо потребуєте точний збіг)
+        params['search_query'] = f"{search_query}%"
 
     if where_conditions:
         query_parts.append("WHERE " + " AND ".join(where_conditions))
 
-    # Add ORDER BY
+    # ORDER BY
     sort_field = "r.date" if sort == 'date' else sort
     sort_direction = "ASC" if order == 'asc' else "DESC"
     query_parts.append(f"ORDER BY {sort_field} {sort_direction}")
 
-    # Combine all parts into one query
+    # Збираємо і виконуємо
     main_query = " ".join(query_parts)
-
-    # Execute the query
     receipts_data = db.session.execute(text(main_query), params).mappings().all()
 
-    # Convert list of mappings to list of dicts
+    # Обробка результатів, як було
     receipts = []
     total_sum = 0
-
     for r in receipts_data:
-        # Get receipt items and calculate totals using a separate query
         items_query = text(f"""
-            SELECT ri.upc, ri.quantity, 
-                   CASE 
-                       WHEN sp.is_promotional = TRUE THEN sp.promo_price 
-                       ELSE sp.price 
-                   END as price
+            SELECT ri.upc, ri.quantity,
+                   CASE WHEN sp.is_promotional THEN sp.promo_price ELSE sp.price END AS price
             FROM {receiptitem_table} ri
             JOIN {storeproduct_table} sp ON ri.upc = sp.upc
             WHERE ri.receipt_number = :receipt_number
         """)
-
         items = db.session.execute(items_query, {'receipt_number': r['receipt_number']}).mappings().all()
-
-        # Calculate totals
         receipt_total = sum(item['price'] * item['quantity'] for item in items) if items else 0
-        vat = receipt_total * 0.2  # Assuming VAT is 20%
-
         total_sum += receipt_total
-
-        # Create a receipt object with all needed data
-        receipt = {
+        receipts.append({
             'receipt_number': r['receipt_number'],
             'date': r['date'],
             'total_sum': receipt_total,
-            'vat': vat,
+            'vat': receipt_total * 0.2,
             'employee': {
                 'id': r['employee_id'],
                 'first_name': r['first_name'],
-                'last_name': r['last_name']
+                'last_name': r['last_name'],
             }
-        }
+        })
 
-        receipts.append(receipt)
-
-    # Get all employees for the employee filter dropdown
-    employees_query = text(f"SELECT * FROM {employee_table}")
-    employees = db.session.execute(employees_query).mappings().all()
+    # Список касирів для фільтру
+    employees = db.session.execute(text(f"SELECT * FROM {employee_table}")).mappings().all()
 
     return render_template(
         'receipts.html',
@@ -119,8 +111,14 @@ def receipts():
         employees=employees,
         total_sum=total_sum,
         sort=sort,
-        order=order
+        order=order,
+        # передамо назад, щоб в полях залишилось значення
+        search_query=search_query,
+        employee_id=employee_id,
+        date_from=date_from,
+        date_to=date_to
     )
+
 
 
 @views.route('/view_receipt/<receipt_number>')
@@ -361,10 +359,17 @@ def add_receipts():
                     'quantity': quantity
                 })
 
-                # Оновлюємо кількість товару на складі
-                db.session.execute(text("""
-                    UPDATE store_product SET quantity = quantity - :qty WHERE upc = :upc
-                """), {'qty': quantity, 'upc': upc})
+                # Оновлюємо кількість товару або видаляємо, якщо залишок 0
+                new_quantity = stock - quantity
+
+                if new_quantity > 0:
+                    db.session.execute(text("""
+                            UPDATE store_product SET quantity = :qty WHERE upc = :upc
+                        """), {'qty': new_quantity, 'upc': upc})
+                else:
+                    db.session.execute(text("""
+                            DELETE FROM store_product WHERE upc = :upc
+                        """), {'upc': upc})
 
             db.session.commit()
             return jsonify({'success': True, 'receipt_number': receipt_number})

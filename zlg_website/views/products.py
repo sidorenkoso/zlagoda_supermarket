@@ -12,73 +12,67 @@ from ..models import Product, Employee
 @views.route('/products')
 @login_required
 def products():
-   category_number = request.args.get('category')
-   sort = request.args.get('sort')
-   order = request.args.get('order', 'asc')
-   search_query = request.args.get('search', '')
+    category_number = request.args.get('category')
+    sort = request.args.get('sort')
+    order = request.args.get('order', 'asc')
+    search_query = request.args.get('search', '').strip()
 
+    # Будуємо базовий SQL запит
+    sql_str = """
+        SELECT p.*, c.name AS category_name
+        FROM product p
+        JOIN category c ON p.category_number = c.category_number
+    """
+    where_clauses = []
+    params = {}
 
-   # Будуємо базовий SQL запит
-   sql_str = """
-       SELECT p.*, c.name AS category_name
-       FROM product p
-       JOIN category c ON p.category_number = c.category_number
-   """
-   where_clauses = []
-   params = {}
+    # Додаємо умови WHERE для категорії
+    if category_number:
+        where_clauses.append("p.category_number = :category_number")
+        params['category_number'] = int(category_number)
 
+    # Об'єднуємо умови WHERE, якщо вони є
+    if where_clauses:
+        sql_str += " WHERE " + " AND ".join(where_clauses)
 
-   # Додаємо умови WHERE
-   if category_number:
-       where_clauses.append("p.category_number = :category_number")
-       params['category_number'] = int(category_number)
+    # Додаємо ORDER BY
+    if sort == 'name':
+        sql_str += f" ORDER BY p.name {order}"
+    elif sort == 'id':
+        sql_str += f" ORDER BY p.id {order}"
+    else:
+        sql_str += " ORDER BY p.id ASC"  # Значення за замовчуванням
 
+    # Виконуємо запит до бази
+    stmt = text(sql_str)
+    result = db.session.execute(stmt, params)
+    products = [dict(row._mapping) for row in result.fetchall()]
 
-   # Додаємо пошук за назвою через SQL, а не Python
-   if search_query:
-       where_clauses.append("LOWER(p.name) LIKE :search_query")
-       params['search_query'] = f"%{search_query.lower()}%"
+    # Додаємо пошук за назвою через Python, а не SQL
+    if search_query:
+        low = search_query.lower()
+        products = [
+            p for p in products
+            if p['name'].lower().startswith(low)  # Пошук за початком назви
+        ]
 
+    # Отримуємо всі категорії для фільтра
+    categories_sql = text("SELECT * FROM category")
+    categories_result = db.session.execute(categories_sql)
+    categories = [dict(row._mapping) for row in categories_result.fetchall()]
 
-   # Об'єднуємо умови WHERE, якщо вони є
-   if where_clauses:
-       sql_str += " WHERE " + " AND ".join(where_clauses)
+    # Повертаємо результат на шаблон
+    return render_template(
+        "products.html",
+        user=current_user,
+        products=products,
+        categories=categories,
+        sort=sort,
+        order=order,
+        category_number=category_number,
+        search_query=search_query
+    )
 
-
-   # Додаємо ORDER BY
-   if sort == 'name':
-       sql_str += f" ORDER BY p.name {order}"
-   elif sort == 'id':
-       sql_str += f" ORDER BY p.id {order}"
-   else:
-       sql_str += " ORDER BY p.id ASC"  # Значення за замовчуванням
-
-
-   # Виконуємо запит
-   stmt = text(sql_str)
-   result = db.session.execute(stmt, params)
-
-
-   # Перетворюємо результат у список словників для шаблону
-   products = [dict(row._mapping) for row in result.fetchall()]
-
-
-   # Отримуємо всі категорії для фільтра
-   categories_sql = text("SELECT * FROM category")
-   categories_result = db.session.execute(categories_sql)
-   categories = [dict(row._mapping) for row in categories_result.fetchall()]
-
-
-   return render_template(
-       "products.html",
-       user=current_user,
-       products=products,
-       categories=categories,
-       sort=sort,
-       order=order,
-       category_number=category_number,
-       search_query=search_query
-   )
 
 
 

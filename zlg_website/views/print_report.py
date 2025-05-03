@@ -87,8 +87,8 @@ def print_receipts_report():
                        WHEN sp.is_promotional = TRUE THEN sp.promo_price 
                        ELSE sp.price 
                    END as price
-            FROM ReceiptItem ri
-            JOIN StoreProduct sp ON ri.upc = sp.upc
+            FROM receipt_item ri
+            JOIN store_product sp ON ri.upc = sp.upc
             WHERE ri.receipt_number = :receipt_number
         """
 
@@ -113,7 +113,7 @@ def print_receipts_report():
         receipts.append(receipt)
 
     return render_template(
-        'print_receipts_report.html',
+        'print_receipts.html',
         receipts=receipts,
         total_sum=total_sum,
         date_from=date_from,
@@ -183,7 +183,7 @@ def print_storeproducts_report():
     sql_query = text("""
         SELECT sp.upc, p.name AS product_name, sp.price, sp.quantity, sp.is_promotional, 
                sp.promo_price, c.name AS category_name
-        FROM StoreProduct sp
+        FROM store_product sp
         JOIN Product p ON sp.product_id = p.id
         JOIN Category c ON p.category_number = c.category_number
         ORDER BY p.name
@@ -203,7 +203,7 @@ def print_clients_report():
     sql_query = text("""
         SELECT c.card_number, c.last_name, c.first_name, c.middle_name, 
                c.phone, c.city, c.street, c.postal_code, c.discount_percent
-        FROM CustomerCard c
+        FROM customer_card c
         ORDER BY last_name, first_name
     """)
 
